@@ -12,6 +12,7 @@ import pymongo
 from pymongo import MongoClient
 import datetime
 from datetime import datetime
+from datetime import timedelta
 from datetime import date
 import json
 import googlemaps
@@ -19,13 +20,19 @@ import calendar
 
 class Google():
 
-    def __init__(self, start_address, end_address, mode, departure_time):
+    def __init__(self, start_address, end_address, mode, start_date, end_date, departure_time_min, departure_time_max):
 
         #  Initialise the necessary variables
         self.start_address = start_address
         self.end_address = end_address
         self.travel_mode = mode
-        self.departure_time = departure_time
+        self.start_date = start_date
+        self.end_date = end_date
+        self.departure_time_min = departure_time_min
+        self.departure_time_max = departure_time_max
+
+        # Number of minutes between each entry.
+        self.time_step = 10
 
         # Read in the Google API Key from the config file
 
@@ -43,13 +50,26 @@ class Google():
 
     def obtain_Insert_API_Data(self):
 
-        # TODO: ERROR HANDLING FOR API FAILURES
-        directions_result = self.gmaps.directions(self.start_address,
-                                     self.end_address,
-                                     mode=self.travel_mode,
-                                     departure_time=self.departure_time)
+        current_date = self.start_date
+        while current_date <= self.end_date:
 
-        self.insert_MongoDB(directions_result, self.departure_time)
+            current_time = self.departure_time_min
+            while current_time <= self.departure_time_max:
+                c_date_time = str(current_date) + ' ' + str(current_time)
+                d = datetime.strptime(c_date_time, '%Y-%m-%d %H:%M:%S')
+                print d
+
+                # TODO: ERROR HANDLING FOR API FAILURES
+                directions_result = self.gmaps.directions(self.start_address,
+                                             self.end_address,
+                                             mode=self.travel_mode,
+                                             departure_time=d)
+
+                self.insert_MongoDB(directions_result, d)
+
+                # Increment the time by the time step
+                current_time = (datetime.strptime('1900-01-01' + ' ' + str(current_time), '%Y-%m-%d %H:%M:%S') + timedelta(minutes = self.time_step)).time()
+            current_date = current_date + timedelta(days=1)
 
 
     def insert_MongoDB(self, data, departure_time):

@@ -1,107 +1,22 @@
 import googlemaps
-from datetime import datetime
+import datetime
+from datetime import timedelta
+import time
 from dateutil import tz
 import time
 from c_Google import *
 
-departure_time = datetime.strptime('2016-02-08 07:00:00', '%Y-%m-%d %H:%M:%S')
-g = Google('Menai, NSW', 'Taronga Zoo, NSW', 'driving', departure_time)
-g.obtain_Insert_API_Data()
+# Monday is 0, Sunday is 6. So we want 0 (Monday) and 4 (Friday)
+today = datetime.today().date()
+monday = today + timedelta( (0-today.weekday()) % 7 )
+friday = today + timedelta( (4-today.weekday()) % 7 )
 
-departure_time = datetime.strptime('2016-02-08 07:15:00', '%Y-%m-%d %H:%M:%S')
-g = Google('Menai, NSW', 'Taronga Zoo, NSW', 'driving', departure_time)
-g.obtain_Insert_API_Data()
+print 'Monday is: ' + str(monday)
+print 'Friday is: ' + str(friday)
 
-departure_time = datetime.strptime('2016-02-08 07:30:00', '%Y-%m-%d %H:%M:%S')
-g = Google('Menai, NSW', 'Taronga Zoo, NSW', 'driving', departure_time)
-g.obtain_Insert_API_Data()
-
-departure_time = datetime.strptime('2016-02-08 07:45:00', '%Y-%m-%d %H:%M:%S')
-g = Google('Menai, NSW', 'Taronga Zoo, NSW', 'driving', departure_time)
-g.obtain_Insert_API_Data()
-
-departure_time = datetime.strptime('2016-02-08 08:00:00', '%Y-%m-%d %H:%M:%S')
-g = Google('Menai, NSW', 'Taronga Zoo, NSW', 'driving', departure_time)
-g.obtain_Insert_API_Data()
-
-departure_time = datetime.strptime('2016-02-09 07:00:00', '%Y-%m-%d %H:%M:%S')
-g = Google('Menai, NSW', 'Taronga Zoo, NSW', 'driving', departure_time)
-g.obtain_Insert_API_Data()
-
-departure_time = datetime.strptime('2016-02-09 07:15:00', '%Y-%m-%d %H:%M:%S')
-g = Google('Menai, NSW', 'Taronga Zoo, NSW', 'driving', departure_time)
-g.obtain_Insert_API_Data()
-
-departure_time = datetime.strptime('2016-02-09 07:30:00', '%Y-%m-%d %H:%M:%S')
-g = Google('Menai, NSW', 'Taronga Zoo, NSW', 'driving', departure_time)
-g.obtain_Insert_API_Data()
-
-departure_time = datetime.strptime('2016-02-09 07:45:00', '%Y-%m-%d %H:%M:%S')
-g = Google('Menai, NSW', 'Taronga Zoo, NSW', 'driving', departure_time)
-g.obtain_Insert_API_Data()
-
-departure_time = datetime.strptime('2016-02-09 08:00:00', '%Y-%m-%d %H:%M:%S')
-g = Google('Menai, NSW', 'Taronga Zoo, NSW', 'driving', departure_time)
-g.obtain_Insert_API_Data()
-
-departure_time = datetime.strptime('2016-02-10 07:00:00', '%Y-%m-%d %H:%M:%S')
-g = Google('Menai, NSW', 'Taronga Zoo, NSW', 'driving', departure_time)
-g.obtain_Insert_API_Data()
-
-departure_time = datetime.strptime('2016-02-10 07:15:00', '%Y-%m-%d %H:%M:%S')
-g = Google('Menai, NSW', 'Taronga Zoo, NSW', 'driving', departure_time)
-g.obtain_Insert_API_Data()
-
-departure_time = datetime.strptime('2016-02-10 07:30:00', '%Y-%m-%d %H:%M:%S')
-g = Google('Menai, NSW', 'Taronga Zoo, NSW', 'driving', departure_time)
-g.obtain_Insert_API_Data()
-
-departure_time = datetime.strptime('2016-02-10 07:45:00', '%Y-%m-%d %H:%M:%S')
-g = Google('Menai, NSW', 'Taronga Zoo, NSW', 'driving', departure_time)
-g.obtain_Insert_API_Data()
-
-departure_time = datetime.strptime('2016-02-10 08:00:00', '%Y-%m-%d %H:%M:%S')
-g = Google('Menai, NSW', 'Taronga Zoo, NSW', 'driving', departure_time)
-g.obtain_Insert_API_Data()
-
-departure_time = datetime.strptime('2016-02-11 07:00:00', '%Y-%m-%d %H:%M:%S')
-g = Google('Menai, NSW', 'Taronga Zoo, NSW', 'driving', departure_time)
-g.obtain_Insert_API_Data()
-
-departure_time = datetime.strptime('2016-02-11 07:15:00', '%Y-%m-%d %H:%M:%S')
-g = Google('Menai, NSW', 'Taronga Zoo, NSW', 'driving', departure_time)
-g.obtain_Insert_API_Data()
-
-departure_time = datetime.strptime('2016-02-11 07:30:00', '%Y-%m-%d %H:%M:%S')
-g = Google('Menai, NSW', 'Taronga Zoo, NSW', 'driving', departure_time)
-g.obtain_Insert_API_Data()
-
-departure_time = datetime.strptime('2016-02-11 07:45:00', '%Y-%m-%d %H:%M:%S')
-g = Google('Menai, NSW', 'Taronga Zoo, NSW', 'driving', departure_time)
-g.obtain_Insert_API_Data()
-
-departure_time = datetime.strptime('2016-02-11 08:00:00', '%Y-%m-%d %H:%M:%S')
-g = Google('Menai, NSW', 'Taronga Zoo, NSW', 'driving', departure_time)
-g.obtain_Insert_API_Data()
-
-departure_time = datetime.strptime('2016-02-12 07:00:00', '%Y-%m-%d %H:%M:%S')
-g = Google('Menai, NSW', 'Taronga Zoo, NSW', 'driving', departure_time)
-g.obtain_Insert_API_Data()
-
-departure_time = datetime.strptime('2016-02-12 07:15:00', '%Y-%m-%d %H:%M:%S')
-g = Google('Menai, NSW', 'Taronga Zoo, NSW', 'driving', departure_time)
-g.obtain_Insert_API_Data()
-
-departure_time = datetime.strptime('2016-02-12 07:30:00', '%Y-%m-%d %H:%M:%S')
-g = Google('Menai, NSW', 'Taronga Zoo, NSW', 'driving', departure_time)
-g.obtain_Insert_API_Data()
-
-departure_time = datetime.strptime('2016-02-12 07:45:00', '%Y-%m-%d %H:%M:%S')
-g = Google('Menai, NSW', 'Taronga Zoo, NSW', 'driving', departure_time)
-g.obtain_Insert_API_Data()
-
-departure_time = datetime.strptime('2016-02-12 08:00:00', '%Y-%m-%d %H:%M:%S')
-g = Google('Menai, NSW', 'Taronga Zoo, NSW', 'driving', departure_time)
+departure_time_min = datetime.strptime('07:00:00', '%H:%M:%S').time()
+departure_time_max = datetime.strptime('08:00:00', '%H:%M:%S').time()
+g = Google('Menai, NSW', 'Taronga Zoo, NSW', 'driving', monday, friday, departure_time_min, departure_time_max)
 g.obtain_Insert_API_Data()
 
 
