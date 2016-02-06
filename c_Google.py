@@ -15,6 +15,7 @@ from datetime import datetime
 from datetime import date
 import json
 import googlemaps
+import calendar
 
 class Google():
 
@@ -43,25 +44,29 @@ class Google():
     def obtain_Insert_API_Data(self):
 
         # TODO: ERROR HANDLING FOR API FAILURES
-        directions_result = self.gmaps.directions("Menai, NSW",
-                                     "Taronga Zoo, NSW",
-                                     mode="driving",
+        directions_result = self.gmaps.directions(self.start_address,
+                                     self.end_address,
+                                     mode=self.travel_mode,
                                      departure_time=self.departure_time)
 
-        self.insert_MongoDB(directions_result)
+        self.insert_MongoDB(directions_result, self.departure_time)
 
 
-    def insert_MongoDB(self, data):
+    def insert_MongoDB(self, data, departure_time):
         # Connect to Mongo DB
         client = MongoClient()
 
         db = client.Hecate
         collection = db.Travel_Route
-        collection.remove( {} )
+        #collection.remove( {} )
         #deleted =  collection.delete_many({"$and": [{"user.xid": self.id},
         #              {"time_created": {"$gt": start_epoch}}]})
 
         #print "Deleted %i records" %deleted.deleted_count
+
+        data[0]['departure_time'] = departure_time
+        data[0]['departure_day'] = calendar.day_name[departure_time.weekday()]
+        data[0]['departure_time_of_day'] = datetime.strftime(departure_time, '%H:%M%p')
 
         id = collection.insert(data)
         print "Inserted id %s into MongoDB." %id
