@@ -78,6 +78,8 @@ class Google():
 
         db = client.Hecate
         collection = db.Travel_Route
+
+        # TODO REMOVE ANY EXISTING RECORDS
         #collection.remove( {} )
         #deleted =  collection.delete_many({"$and": [{"user.xid": self.id},
         #              {"time_created": {"$gt": start_epoch}}]})
