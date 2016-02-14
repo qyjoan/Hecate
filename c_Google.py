@@ -20,14 +20,13 @@ import calendar
 
 class Google():
 
-    def __init__(self, start_address, end_address, mode, start_date, end_date, departure_time_min, departure_time_max):
+    def __init__(self, start_address, end_address, mode, travel_dates, departure_time_min, departure_time_max):
 
         #  Initialise the necessary variables
         self.start_address = start_address
         self.end_address = end_address
         self.travel_mode = mode
-        self.start_date = start_date
-        self.end_date = end_date
+        self.travel_dates = travel_dates
         self.departure_time_min = departure_time_min
         self.departure_time_max = departure_time_max
 
@@ -50,12 +49,10 @@ class Google():
 
     def obtain_Insert_API_Data(self):
 
-        current_date = self.start_date
-        while current_date <= self.end_date:
-
+        for travel_d in self.travel_dates:
             current_time = self.departure_time_min
             while current_time <= self.departure_time_max:
-                c_date_time = str(current_date) + ' ' + str(current_time)
+                c_date_time = str(travel_d) + ' ' + str(current_time)
                 d = datetime.strptime(c_date_time, '%Y-%m-%d %H:%M:%S')
                 print d
 
@@ -69,8 +66,6 @@ class Google():
 
                 # Increment the time by the time step
                 current_time = (datetime.strptime('1900-01-01' + ' ' + str(current_time), '%Y-%m-%d %H:%M:%S') + timedelta(minutes = self.time_step)).time()
-            current_date = current_date + timedelta(days=1)
-
 
     def insert_MongoDB(self, data, departure_time):
         # Connect to Mongo DB
