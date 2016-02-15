@@ -19,20 +19,24 @@ import calendar
 
 class User():
 
-    username = None
-    name = None
-    admin = None
-    start_location = None
-    end_location = None
-    transportation = None
-    travel_days = None
-    earliest_start = None
-    latest_start = None
-    earliest_arrive = None
-    latest_arrive = None
-    earliest_home = None
-    latest_home = None
-    user = None
+    username = None #string
+    name = None  #string
+    admin = None  #{True, False}
+    start_location = None #string (city, country required)
+    end_location = None #string (city, country required)
+    transportation = None #{'DRIVING','BICYCLING','TRANSIT','WALKING'}
+    travel_days = None #['sunday','monday',...,'saturday']
+    earliest_start = None #'hh:mm'
+    latest_start = None   #'hh:mm'
+    earliest_arrive = None  #'hh:mm'
+    latest_arrive = None  #'hh:mm'
+    earliest_home = None  #'hh:mm' leaving for home time
+    latest_home = None  #'hh:mm' leaving for home time
+    user = None  #string
+    current_start = None #'hh:mm' current leaving for work time
+    current_duration_start = None #int (minutes)
+    current_home = None #'hh:mm' current leaving for home time
+    current_duration_home = None #int (minutes)
 
     def __init__(self, username):
 
@@ -59,8 +63,12 @@ class User():
         self.latest_start = user['route']['times']['outbound']['latest_start']
         self.earliest_arrive = user['route']['times']['outbound']['earliest_arrive']
         self.latest_arrive = user['route']['times']['outbound']['latest_arrive']
+        self.current_start = user['route']['times']['outbound']['current_start']
+        self.current_duration_start = user['route']['times']['outbound']['current_duration']
         self.earliest_home = user['route']['times']['homebound']['earliest_start']
         self.latest_home = user['route']['times']['homebound']['latest_start']
+        self.current_home = user['route']['times']['homebound']['current_start']
+        self.current_duration_home = user['route']['times']['homebound']['current_duration']
 
         self.user = user
 
@@ -77,6 +85,10 @@ class User():
         print "Latest Arrive: %s" %self.latest_arrive
         print "Earliest Home: %s" %self.earliest_home
         print "Latest Home: %s" %self.latest_home
+        print "Current Start: %s" %self.current_start
+        print "Current Outbound Duration: {} min".format(self.current_duration_start)
+        print "Current Home: %s" %self.current_home
+        print "Current Inbound Duration: {} min".format(self.current_duration_home)
 
 
     def get_Name(self):
@@ -106,6 +118,12 @@ class User():
     def get_Latest_Start(self):
         return self.latest_start
 
+    def get_Current_Start(self):
+        return self.current_start
+
+    def get_Current_Outbound_Duration(self):
+        return self.current_duration_start
+
     def get_Earliest_Arrive(self):
         return self.earliest_arrive
 
@@ -117,6 +135,12 @@ class User():
 
     def get_Latest_Home(self):
         return self.latest_home
+
+    def get_Current_Home(self):
+        return self.current_home
+
+    def get_Current_Inbound_Duration(self):
+        return self.current_duration_home
 
     def set_Password(self, password):
         self.user['password'] = password
