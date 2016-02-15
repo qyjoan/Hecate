@@ -57,6 +57,8 @@ class Google():
         for travel_d in self.travel_dates:
 
             # if arrival time is available, use arrival time as referrence
+            # Note: Problem is using arrival time is that duration_in_traffic
+            #       will not be populated. (https://goo.gl/rnFLAo)
             if self.arrival_time_min is not None:
                 current_time = self.arrival_time_min
                 upper_bound = self.arrival_time_max
@@ -135,7 +137,7 @@ class Google():
             if 'duration_in_traffic' in route:
                 duration_in_traffic = route['duration_in_traffic']['text']
                 if 'Duration (Traffic)' not in x.field_names:
-                    x.add_column("Duration (Traffic)")
+                    x.add_column("Duration (Traffic)",[])
                 x.add_row([added, day, time, start, end, duration, duration_in_traffic])
             else:
                 x.add_row([added, day, time, start, end, duration])

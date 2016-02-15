@@ -25,7 +25,8 @@ from prettytable import PrettyTable
 import time
 
 
-user = User('qyjoan')
+username = sys.argv[2]
+user = User(username)
 user.print_Details()
 
 days = user.get_Travel_Days()
@@ -40,7 +41,7 @@ arrival_time_max = datetime.strptime(user.get_Latest_Arrive(), '%H:%M').time()
 departure_time_min = datetime.strptime(user.get_Earliest_Arrive(), '%H:%M').time()
 departure_time_max = datetime.strptime(user.get_Latest_Arrive(), '%H:%M').time()
 
-g = Google(user.get_Start_Address(), user.get_End_Address(), user.get_Transportation(), travel_days, departure_time_min, departure_time_max, user.username)
+g = Google(user.get_Start_Address(), user.get_End_Address(), user.get_Transportation(), travel_days, departure_time_min, departure_time_max, arrival_time_min, arrival_time_max, user.username)
 
 if sys.argv[1] == 'output':
     g.output_data()

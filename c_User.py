@@ -24,8 +24,8 @@ class User():
     admin = None  #{True, False}
     start_location = None #string (city, country required)
     end_location = None #string (city, country required)
-    transportation = None #{'DRIVING','BICYCLING','TRANSIT','WALKING'}
-    travel_days = None #['sunday','monday',...,'saturday']
+    transportation = None #{'driving','bicycling','transit','walking'}
+    travel_days = None #['Sunday','Monday',...,'Saturday']
     earliest_start = None #'hh:mm'
     latest_start = None   #'hh:mm'
     earliest_arrive = None  #'hh:mm'
