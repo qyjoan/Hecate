@@ -22,7 +22,7 @@ import time
 
 class Google():
 
-    def __init__(self, start_address, end_address, mode, travel_dates, departure_time_min, departure_time_max, username):
+    def __init__(self, start_address, end_address, mode, travel_dates, departure_time_min, departure_time_max, arrival_time_min, arrival_time_max, username):
 
         #  Initialise the necessary variables
         self.start_address = start_address
@@ -32,6 +32,8 @@ class Google():
         self.departure_time_min = departure_time_min
         self.departure_time_max = departure_time_max
         self.user_name = username
+        self.arrival_time_min = arrival_time_min
+        self.arrival_time_max = arrival_time_max
 
         # Number of minutes between each entry.
         self.time_step = 10
@@ -53,18 +55,32 @@ class Google():
     def obtain_Insert_API_Data(self):
 
         for travel_d in self.travel_dates:
-            current_time = self.departure_time_min
-            while current_time <= self.departure_time_max:
+
+            # if arrival time is available, use arrival time as referrence
+            if self.arrival_time_min is not None:
+                current_time = self.arrival_time_min
+                upper_bound = self.arrival_time_max
+            else:
+                current_time = self.departure_time_min
+                upper_bound = self.arrival_time_max
+
+            while current_time <= upper_bound:
                 c_date_time = str(travel_d) + ' ' + str(current_time)
                 d = datetime.strptime(c_date_time, '%Y-%m-%d %H:%M:%S')
                 print d
                 if d >= datetime.today():
 
                     # TODO: ERROR HANDLING FOR API FAILURES
-                    directions_result = self.gmaps.directions(self.start_address,
-                                                 self.end_address,
-                                                 mode=self.travel_mode,
-                                                 departure_time=d)
+                    if self.arrival_time_min is not None:
+                        directions_result = self.gmaps.directions(self.start_address,
+                                self.end_address,
+                                mode=self.travel_mode,
+                                arrival_time=d)
+                    else:
+                        directions_result = self.gmaps.directions(self.start_address,
+                                self.end_address,
+                                mode=self.travel_mode,
+                                departure_time=d)
 
                     self.insert_MongoDB(directions_result, d)
 
@@ -106,7 +122,7 @@ class Google():
         # Note that, for this data_url, the returned JSON data contains "meta" and "data"
         data = collection.find({ 'username' : self.user_name })
 
-        x = PrettyTable(['Added Date', 'Day', 'Time', 'Start Location', 'End Location', 'Duration', 'Duration (Traffic)'])
+        x = PrettyTable(['Added Date', 'Day', 'Time', 'Start Location', 'End Location', 'Duration'])
         for item in data:
 
             route = item['legs'][0]
@@ -116,8 +132,12 @@ class Google():
             start = route['start_address']
             end = route['end_address']
             duration = route['duration']['text']
-            duration_in_traffic = route['duration_in_traffic']['text']
-
-            x.add_row([added, day, time, start, end, duration, duration_in_traffic])
+            if 'duration_in_traffic' in route:
+                duration_in_traffic = route['duration_in_traffic']['text']
+                if 'Duration (Traffic)' not in x.field_names:
+                    x.add_column("Duration (Traffic)")
+                x.add_row([added, day, time, start, end, duration, duration_in_traffic])
+            else:
+                x.add_row([added, day, time, start, end, duration])
         print x.get_string(sortby="Added Date")
 
