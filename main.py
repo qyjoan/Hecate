@@ -12,9 +12,11 @@ from datetime import timedelta
 import time
 from dateutil import tz
 import time
+import sys
 from c_Google import *
 from c_User import *
 
+# TODO: This needs to take into account time, and become date and time?
 def initialise_days(days):
 
     day_to_date = {}
@@ -36,10 +38,16 @@ def initialise_days(days):
 
 if __name__ == '__main__':
     user = User('samacart')
+
     travel_days = initialise_days(user.travel_days)
 
     departure_time_min = datetime.strptime(user.earliest_start, '%H:%M').time()
     departure_time_max = datetime.strptime(user.latest_start, '%H:%M').time()
 
-    g = Google(user.get_Start_Address(), user.get_End_Address(), user.get_Transportation(), travel_days, departure_time_min, departure_time_max)
-    g.obtain_Insert_API_Data()
+    g = Google('Newport, NY, USA', 'Bryant Park, New York, NY, USA', user.get_Transportation(), travel_days, departure_time_min, departure_time_max, user.username)
+    #g = Google(user.get_Start_Address(), user.get_End_Address(), user.get_Transportation(), travel_days, departure_time_min, departure_time_max, user.username)
+
+    if sys.argv[1] == 'output':
+        g.output_data()
+    else:
+        g.obtain_Insert_API_Data()
