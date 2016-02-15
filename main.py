@@ -44,8 +44,8 @@ if __name__ == '__main__':
     departure_time_min = datetime.strptime(user.earliest_start, '%H:%M').time()
     departure_time_max = datetime.strptime(user.latest_start, '%H:%M').time()
 
-    g = Google('Newport, NY, USA', 'Bryant Park, New York, NY, USA', user.get_Transportation(), travel_days, departure_time_min, departure_time_max, user.username)
-    #g = Google(user.get_Start_Address(), user.get_End_Address(), user.get_Transportation(), travel_days, departure_time_min, departure_time_max, user.username)
+#    g = Google('Newport, NY, USA', 'Bryant Park, New York, NY, USA', user.get_Transportation(), travel_days, departure_time_min, departure_time_max, user.username)
+    g = Google(user.get_Start_Address(), user.get_End_Address(), user.get_Transportation(), travel_days, departure_time_min, departure_time_max, user.username)
 
     if sys.argv[1] == 'output':
         g.output_data()

@@ -94,7 +94,7 @@ class Google():
         id = collection.insert(data)
         print "Inserted id %s into MongoDB." %id
 
-
+    # Print the output
     def output_data(self):
         # Connect to Mongo DB
         client = MongoClient()
