@@ -8,6 +8,7 @@ from c_Google import *
 from c_User import *
 
 user = User('samacart')
+user.Initialise()
 user.print_Details()
 
 # Monday is 0, Sunday is 6. So we want 0 (Monday) and 4 (Friday)

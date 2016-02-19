@@ -37,11 +37,13 @@ class User():
     current_duration_start = None #int (minutes)
     current_home = None #'hh:mm' current leaving for home time
     current_duration_home = None #int (minutes)
+    next_check_time = None # Next time to poll the API to get updated details.
 
     def __init__(self, username):
-
         #  Initialise the necessary variables
         self.username = username
+
+    def Initialise(self):
 
         # Connect to MongoDB
         client = MongoClient()
@@ -50,7 +52,7 @@ class User():
         collection = db.User
 
         # Obtain the user details from the DB
-        user = collection.find_one({'username': username})
+        user = collection.find_one({'username': self.username})
 
         # Initialise necessary items
         self.name = user['name']
@@ -69,6 +71,7 @@ class User():
         self.latest_home = user['route']['times']['homebound']['latest_start']
         self.current_home = user['route']['times']['homebound']['current_start']
         self.current_duration_home = user['route']['times']['homebound']['current_duration']
+        self.next_check_time = user['next_check_time']
 
         self.user = user
 
@@ -89,7 +92,7 @@ class User():
         print "Current Outbound Duration: {} min".format(self.current_duration_start)
         print "Current Home: %s" %self.current_home
         print "Current Inbound Duration: {} min".format(self.current_duration_home)
-
+        print "Next API Poll at %s" %self.next_check_time
 
     def get_Name(self):
         return self.Name
@@ -142,6 +145,9 @@ class User():
     def get_Current_Inbound_Duration(self):
         return self.current_duration_home
 
+    def get_Next_Check_Time(self):
+        return self.next_check_time
+
     def set_Password(self, password):
         self.user['password'] = password
 
@@ -150,3 +156,42 @@ class User():
 
     def set_Admin(self, admin):
         self.user['admin'] = admin
+
+    # Type - 'homebound', 'outbound' - refers to the mongo schema name
+    def set_Current_Duration(self, type, duration):
+        self.current_start = duration
+        field = "route.times." + type + ".current_duration"
+        result = self.update_Mongo(field , duration)
+        print result
+
+    # Type - 'homebound', 'outbound' - refers to the mongo schema name
+    def set_Current_Start(self, type, start):
+        self.current_start = start
+        field = "route.times." + type + ".current_start"
+        result = self.update_Mongo(field , start)
+        print result
+
+    # Update the next time the API is to be polled
+    def set_Next_Check_Time(self, next_time):
+        self.next_check_time = next_time
+        result = self.update_Mongo("next_check_time", next_time)
+        print result
+
+    # Push the changes to Mongo - pass a key, value pair
+    def update_Mongo(self, key, value):
+        # Connect to MongoDB
+        client = MongoClient()
+
+        db = client.Hecate
+        collection = db.User
+
+        result = collection.update_one(
+            {'username': self.username},
+            {
+                "$set":{
+                    key: value
+                }
+            }
+        )
+
+        return result.modified_count

@@ -36,18 +36,64 @@ def initialise_days(days):
 
     return return_dates
 
+def update_Next_Check_Time(type):
+    # TODO Add Logic to choose next check time based upon how long to go
+
+    # if type == 'outbound':
+    #     for day in user.get_Travel_Days():
+    #         earliest = day_to_date[day]
+    #     print datetime.strptime(user.get_Earliest_Start(), '%Y-%m-%d %H:%M')
+    #     time_to_go = datetime.strptime(user.get_Earliest_Start(), '%Y-%m-%d %H:%M') - datetime.now()
+    #     print time_to_go
+
+    user.set_Next_Check_Time(datetime.now() +  + timedelta(hours=1))
+
+
 if __name__ == '__main__':
-    user = User('samacart')
+    # Every 5 mins - check
+    # Check Time - initially load, set to 1 hour from insert
+    # Check Hourly - until within 2 hours of departure time
+    # Check 15 mins - from within 2 hours before departure time
 
-    travel_days = initialise_days(user.travel_days)
+    # Loop through all records with a next_check_time <= now
+    current_time = datetime.now()
 
-    departure_time_min = datetime.strptime(user.earliest_start, '%H:%M').time()
-    departure_time_max = datetime.strptime(user.latest_start, '%H:%M').time()
+    # Connect to MongoDB
+    client = MongoClient()
 
-#    g = Google('Newport, NY, USA', 'Bryant Park, New York, NY, USA', user.get_Transportation(), travel_days, departure_time_min, departure_time_max, user.username)
-    g = Google(user.get_Start_Address(), user.get_End_Address(), user.get_Transportation(), travel_days, departure_time_min, departure_time_max, user.username)
+    db = client.Hecate
+    collection = db.User
 
-    if sys.argv[1] == 'output':
-        g.output_data()
-    else:
-        g.obtain_Insert_API_Data()
+    # Obtain all users from the database that are due for an update
+    c = collection.find({'next_check_time': {"$lte": current_time} })
+
+    # Loop through the users, calling the API to update route information and log to route DB
+    for item in c:
+        user = User(item["username"])
+        user.Initialise()
+
+        # Initialise the days
+        travel_days = initialise_days(user.travel_days)
+
+        # Format the departure time min and max
+        departure_time_min = datetime.strptime(user.earliest_start, '%H:%M').time()
+        departure_time_max = datetime.strptime(user.latest_start, '%H:%M').time()
+
+        # Google module does not support arrival yet
+        arrival_time_min = datetime.strptime(user.get_Earliest_Arrive(), '%H:%M').time()
+        arrival_time_max = datetime.strptime(user.get_Latest_Arrive(), '%H:%M').time()
+
+        # Get the latest data from the API
+        # TODO: Only Update the one time that is needed
+        g = Google(user.get_Start_Address(), user.get_End_Address(), user.get_Transportation(), travel_days, departure_time_min, departure_time_max, arrival_time_min, arrival_time_max, user.username)
+
+        # If we only want to output, pass the parameter 'output', else we insert into MongoDB
+        if sys.argv[1] == 'output':
+            g.output_data()
+        else:
+            g.obtain_Insert_API_Data()
+
+        # See how close departure time is and update next check time accordingly.
+        update_Next_Check_Time('outbound')
+
+        print "User: %s\tRoute Information Updated. Next Update at %s " %(user.username, user.get_Next_Check_Time())
