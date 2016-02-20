@@ -16,6 +16,7 @@ from datetime import timedelta
 from datetime import date
 import json
 import googlemaps
+import googlemaps.exceptions
 import calendar
 from prettytable import PrettyTable
 import time
@@ -78,18 +79,33 @@ class Google():
                     print "\t %s\tUpdating Route for departure time: %s" %(datetime.now(), d)
 
                     # TODO: ERROR HANDLING FOR API FAILURES
-                    if self.time_type == 'arrival':
-                        directions_result = self.gmaps.directions(self.start_address,
-                                self.end_address,
-                                mode=self.travel_mode,
-                                arrival_time=d)
-                    else:
-                        directions_result = self.gmaps.directions(self.start_address,
-                                self.end_address,
-                                mode=self.travel_mode,
-                                departure_time=d)
+                    try:
+                        if self.time_type == 'arrival':
+                            directions_result = self.gmaps.directions(self.start_address,
+                                    self.end_address,
+                                    mode=self.travel_mode,
+                                    arrival_time=d)
+                        else:
+                            directions_result = self.gmaps.directions(self.start_address,
+                                    self.end_address,
+                                    mode=self.travel_mode,
+                                    departure_time=d)
 
-                    self.insert_MongoDB(directions_result, d)
+                        self.insert_MongoDB(directions_result, d)
+
+                    except googlemaps.exceptions.ApiError:
+                        print "Google Maps API Error. Retry Later."
+
+                    except googlemaps.exceptions.HTTPError:
+                        print "Google Maps HTTP Error. Retry Later."
+
+                    except googlemaps.exceptions.Timeout:
+                        print "Google Maps Timeout. Retry Later."
+
+                    except googlemaps.exceptions.TransportError:
+                        print "Google Maps Transport Error. Retry Later."
+
+
 
                 # Increment the time by the time step
                 current_time = (datetime.strptime('1900-01-01' + ' ' + str(current_time), '%Y-%m-%d %H:%M:%S') + timedelta(minutes = self.time_step)).time()
