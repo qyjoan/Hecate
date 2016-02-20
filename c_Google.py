@@ -69,7 +69,7 @@ class Google():
             while current_time <= upper_bound:
                 c_date_time = str(travel_d) + ' ' + str(current_time)
                 d = datetime.strptime(c_date_time, '%Y-%m-%d %H:%M:%S')
-                print d
+                print "Processing Route for departure time: %s" %d
                 if d >= datetime.today():
 
                     # TODO: ERROR HANDLING FOR API FAILURES
@@ -110,7 +110,7 @@ class Google():
         data[0]['username'] = self.user_name
 
         id = collection.insert(data)
-        print "Inserted id %s into MongoDB." %id
+        #print "Inserted id %s into MongoDB." %id
 
     # Print the output
     def output_data(self):

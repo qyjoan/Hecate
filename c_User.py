@@ -175,7 +175,6 @@ class User():
     def set_Next_Check_Time(self, next_time):
         self.next_check_time = next_time
         result = self.update_Mongo("next_check_time", next_time)
-        print result
 
     # Push the changes to Mongo - pass a key, value pair
     def update_Mongo(self, key, value):

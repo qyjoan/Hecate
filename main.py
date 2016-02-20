@@ -79,9 +79,6 @@ def update_Next_Check_Time(type):
         user.set_Next_Check_Time(datetime.now() +  + timedelta(hours=1))
 
 if __name__ == '__main__':
-    # Loop through all records with a next_check_time <= now
-    current_time = datetime.now()
-
     # Connect to MongoDB
     client = MongoClient()
 
@@ -90,13 +87,15 @@ if __name__ == '__main__':
 
     # Continue Forever!
     while (1):
+        current_time = datetime.now()
+
         # Obtain all users from the database that are due for an update
         c = collection.find({'next_check_time': {"$lte": current_time} })
         if c.count() == 0:
-            print "%s\tNo Records Found to Update ... Sleeping for 5 mins...." %time.now()
+            print "%s\tNo Records Found to Update ... Sleeping for 5 mins...." %datetime.now()
             time.sleep(300)
         else:
-            print "%s\tFound %s records to process." %(time.now(), c.count())
+            print "%s\tFound %s records to process." %(datetime.now(), c.count())
 
             # Loop through the users, calling the API to update route information and log to route DB
             for item in c:
