@@ -22,7 +22,7 @@ import time
 
 class Google():
 
-    def __init__(self, start_address, end_address, mode, travel_dates, departure_time_min, departure_time_max, arrival_time_min, arrival_time_max, username):
+    def __init__(self, start_address, end_address, mode, travel_dates, departure_time_min, departure_time_max, arrival_time_min, arrival_time_max, username, time_type):
 
         #  Initialise the necessary variables
         self.start_address = start_address
@@ -34,6 +34,7 @@ class Google():
         self.user_name = username
         self.arrival_time_min = arrival_time_min
         self.arrival_time_max = arrival_time_max
+        self.time_type = time_type
 
         # Number of minutes between each entry.
         self.time_step = 10
@@ -63,7 +64,7 @@ class Google():
             # if arrival time is available, use arrival time as referrence
             # Note: Problem is using arrival time is that duration_in_traffic
             #       will not be populated. (https://goo.gl/rnFLAo)
-            if self.arrival_time_min is not None:
+            if self.time_type == 'arrival':
                 current_time = self.arrival_time_min
                 upper_bound = self.arrival_time_max
             else:
@@ -77,7 +78,7 @@ class Google():
                     print "\t %s\tUpdating Route for departure time: %s" %(datetime.now(), d)
 
                     # TODO: ERROR HANDLING FOR API FAILURES
-                    if self.arrival_time_min is not None:
+                    if self.time_type == 'arrival':
                         directions_result = self.gmaps.directions(self.start_address,
                                 self.end_address,
                                 mode=self.travel_mode,

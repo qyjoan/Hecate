@@ -92,7 +92,7 @@ def Process_Route(type, user, days):
         # TODO: Only Update the one time that is needed
 
         # Process the route from A to B (e.g. home to work)
-        g = Google(user.get_Start_Address(), user.get_End_Address(), user.get_Transportation(), travel_days, departure_time_min, departure_time_max, arrival_time_min, arrival_time_max, user.username)
+        g = Google(user.get_Start_Address(), user.get_End_Address(), user.get_Transportation(), travel_days, departure_time_min, departure_time_max, arrival_time_min, arrival_time_max, user.username, 'depature')
 
         # If we only want to output, pass the parameter 'output', else we insert into MongoDB
         if sys.argv[1] == 'output':
