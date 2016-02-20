@@ -93,6 +93,9 @@ class Google():
 
                         self.insert_MongoDB(directions_result, d)
 
+                        # Sleep 10 seconds
+                        time.sleep(10)
+
                     except googlemaps.exceptions.ApiError:
                         print "Google Maps API Error. Retry Later."
 
