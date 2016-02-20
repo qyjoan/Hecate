@@ -9,6 +9,8 @@ from c_User import *
 
 user = User('samacart')
 user.Initialise()
+user.set_Next_Check_Time(datetime.now() +  + timedelta(hours=-11))
+
 user.print_Details()
 
 # Monday is 0, Sunday is 6. So we want 0 (Monday) and 4 (Friday)
