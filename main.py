@@ -74,9 +74,9 @@ def update_Next_Check_Time():
     # If we are 2 hours or less from next closest time, set the next update to be in 15 mins
     # Else set it to be 1 hour
     if closest_mins <= 120:
-        user.set_Next_Check_Time(datetime.now() +  + timedelta(minutes=15))
+        user.set_Next_Check_Time(datetime.now() + timedelta(minutes=15))
     else:
-        user.set_Next_Check_Time(datetime.now() +  + timedelta(hours=1))
+        user.set_Next_Check_Time(datetime.now() + timedelta(hours=1))
 
 def Process_Route(type, user, days):
 

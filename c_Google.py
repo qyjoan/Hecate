@@ -54,6 +54,10 @@ class Google():
 
     def obtain_Insert_API_Data(self):
 
+        print "%s\tUpdating for user %s" %(datetime.now(),self.user_name)
+        print "%s\tRoute Start: %s" %(datetime.now(),self.start_address)
+        print "%s\tRoute End: %s" %(datetime.now(),self.end_address)
+
         for travel_d in self.travel_dates:
 
             # if arrival time is available, use arrival time as referrence
@@ -69,8 +73,8 @@ class Google():
             while current_time <= upper_bound:
                 c_date_time = str(travel_d) + ' ' + str(current_time)
                 d = datetime.strptime(c_date_time, '%Y-%m-%d %H:%M:%S')
-                print "Processing Route for departure time: %s" %d
                 if d >= datetime.today():
+                    print "\t %s\tUpdating Route for departure time: %s" %(datetime.now(), d)
 
                     # TODO: ERROR HANDLING FOR API FAILURES
                     if self.arrival_time_min is not None:
@@ -88,6 +92,9 @@ class Google():
 
                 # Increment the time by the time step
                 current_time = (datetime.strptime('1900-01-01' + ' ' + str(current_time), '%Y-%m-%d %H:%M:%S') + timedelta(minutes = self.time_step)).time()
+
+            print "\t---------------------------------------"
+        print "\t---------------------------------------\n\n"
 
     def insert_MongoDB(self, data, departure_time):
         # Connect to Mongo DB
