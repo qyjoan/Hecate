@@ -42,17 +42,22 @@ class Google():
 
         # Read in the Google API Key from the config file
 
+        self.read_API_Key(1)
+
+        # Get the handle to the API
+        self.gmaps = googlemaps.Client(key=self.api_key)
+
+    def read_API_Key(self, number):
         # TODO: Add Error Handling if config file does not exist
         for line in open("hecate.conf"):
             data = line.split('\n')[0].split('\t')
             api_type = data[0]
             api_key = data[1]
 
-            if api_type == "Google":
+            if api_type == "Google" + str(number):
                 self.api_key = api_key
-
-        # Get the handle to the API
-        self.gmaps = googlemaps.Client(key=self.api_key)
+                self.api_key_number = number
+                print "API Key Updated - Key #%i" %number
 
     def obtain_Insert_API_Data(self):
 
@@ -103,7 +108,13 @@ class Google():
                         print "Google Maps HTTP Error. Retry Later."
 
                     except googlemaps.exceptions.Timeout:
-                        print "Google Maps Timeout. Retry Later."
+                        print "Google Maps Timeout. Trying New Key."
+
+                        # If we are using the first API Key, swap to the second and vice versa
+                        if self.api_key_number == 1:
+                            self.read_API_Key(2)
+                        else:
+                            self.read_API_Key(1)
 
                     except googlemaps.exceptions.TransportError:
                         print "Google Maps Transport Error. Retry Later."
