@@ -64,7 +64,7 @@ class Google():
                 upper_bound = self.arrival_time_max
             else:
                 current_time = self.departure_time_min
-                upper_bound = self.arrival_time_max
+                upper_bound = self.departure_time_max
 
             while current_time <= upper_bound:
                 c_date_time = str(travel_d) + ' ' + str(current_time)

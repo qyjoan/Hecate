@@ -38,7 +38,7 @@ def initialise_days(days):
 
 # Update the next time to call the API to check.
 
-def update_Next_Check_Time(type):
+def update_Next_Check_Time():
     # TODO Add Logic to choose next check time based upon how long to go
     # Check Hourly - until within 2 hours of departure time
     # Check 15 mins - from within 2 hours before departure time
@@ -78,6 +78,48 @@ def update_Next_Check_Time(type):
     else:
         user.set_Next_Check_Time(datetime.now() +  + timedelta(hours=1))
 
+def Process_Route(type, user, days):
+
+    if type == 'outbound':
+        # Format the departure time min and max
+        departure_time_min = datetime.strptime(user.earliest_start, '%H:%M').time()
+        departure_time_max = datetime.strptime(user.latest_start, '%H:%M').time()
+
+        # Google module does not support arrival yet
+        arrival_time_min = datetime.strptime(user.get_Earliest_Arrive(), '%H:%M').time()
+        arrival_time_max = datetime.strptime(user.get_Latest_Arrive(), '%H:%M').time()
+        # Get the latest data from the API
+        # TODO: Only Update the one time that is needed
+
+        # Process the route from A to B (e.g. home to work)
+        g = Google(user.get_Start_Address(), user.get_End_Address(), user.get_Transportation(), travel_days, departure_time_min, departure_time_max, arrival_time_min, arrival_time_max, user.username)
+
+        # If we only want to output, pass the parameter 'output', else we insert into MongoDB
+        if sys.argv[1] == 'output':
+            g.output_data()
+        else:
+            g.obtain_Insert_API_Data()
+    else:
+        # Format the departure time min and max
+        departure_time_min = datetime.strptime(user.earliest_home, '%H:%M').time()
+        departure_time_max = datetime.strptime(user.latest_home, '%H:%M').time()
+
+        # No arrival time for homebound trip
+        arrival_time_min = None
+        arrival_time_max = None
+
+        # Get the latest data from the API
+        # TODO: Only Update the one time that is needed
+
+        # Process the route from B to A (e.g. work to home)
+        g = Google(user.get_End_Address(), user.get_Start_Address(), user.get_Transportation(), travel_days, departure_time_min, departure_time_max, arrival_time_min, arrival_time_max, user.username)
+
+        # If we only want to output, pass the parameter 'output', else we insert into MongoDB
+        if sys.argv[1] == 'output':
+            g.output_data()
+        else:
+            g.obtain_Insert_API_Data()
+
 if __name__ == '__main__':
     # Connect to MongoDB
     client = MongoClient()
@@ -105,25 +147,13 @@ if __name__ == '__main__':
                 # Initialise the days
                 travel_days = initialise_days(user.travel_days)
 
-                # Format the departure time min and max
-                departure_time_min = datetime.strptime(user.earliest_start, '%H:%M').time()
-                departure_time_max = datetime.strptime(user.latest_start, '%H:%M').time()
+                # Process Outbound - e.g. home to work
+                Process_Route('outbound', user, travel_days)
 
-                # Google module does not support arrival yet
-                arrival_time_min = datetime.strptime(user.get_Earliest_Arrive(), '%H:%M').time()
-                arrival_time_max = datetime.strptime(user.get_Latest_Arrive(), '%H:%M').time()
-
-                # Get the latest data from the API
-                # TODO: Only Update the one time that is needed
-                g = Google(user.get_Start_Address(), user.get_End_Address(), user.get_Transportation(), travel_days, departure_time_min, departure_time_max, arrival_time_min, arrival_time_max, user.username)
-
-                # If we only want to output, pass the parameter 'output', else we insert into MongoDB
-                if sys.argv[1] == 'output':
-                    g.output_data()
-                else:
-                    g.obtain_Insert_API_Data()
+                # Process Homebound - e.g. work to home
+                Process_Route('homebound', user, travel_days)
 
                 # See how close departure time is and update next check time accordingly.
-                update_Next_Check_Time('outbound')
+                update_Next_Check_Time()
 
                 print "User: %s\tRoute Information Updated. Next Update at %s " %(user.username, user.get_Next_Check_Time())
