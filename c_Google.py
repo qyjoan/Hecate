@@ -146,6 +146,10 @@ class Google():
         data[0]['departure_time_of_day'] = datetime.strftime(departure_time, '%H:%M%p')
         data[0]['created_date'] = time.strftime("%c")
         data[0]['username'] = self.user_name
+        data[0]['start_address'] = self.start_address
+        data[0]['end_address'] = self.end_address
+        data[0]['travel_mode'] = self.travel_mode
+        data[0]['method_time'] = self.time_type # Depature time or Arrival Time
 
         id = collection.insert(data)
         #print "Inserted id %s into MongoDB." %id
