@@ -8,7 +8,7 @@ On average commuters spend x minutes in traffic. If we can reduce that time by 1
 
 ## User:
 Each user has a profile in this collection.
-
+````
 {
     "username" : <Username of this user>,
     "next_check_time" : <Next time to poll the Google API for this route>,
@@ -46,7 +46,7 @@ Each user has a profile in this collection.
     "created_at" : <Date this record was created>,
     "updated_at" : <Date this record was amended>
 }
-
+````
 
 ## Route:
 
