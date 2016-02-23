@@ -23,7 +23,7 @@ import time
 
 class Google():
 
-    def __init__(self, start_address, end_address, mode, travel_dates, departure_time_min, departure_time_max, arrival_time_min, arrival_time_max, username, time_type):
+    def __init__(self, start_address, end_address, mode, travel_dates, departure_time_min, departure_time_max, arrival_time_min, arrival_time_max, username, time_type, route_type):
 
         #  Initialise the necessary variables
         self.start_address = start_address
@@ -36,6 +36,7 @@ class Google():
         self.arrival_time_min = arrival_time_min
         self.arrival_time_max = arrival_time_max
         self.time_type = time_type
+        self.route_type = route_type
 
         # Number of minutes between each entry.
         self.time_step = 10
@@ -150,6 +151,7 @@ class Google():
         data[0]['end_address'] = self.end_address
         data[0]['travel_mode'] = self.travel_mode
         data[0]['method_time'] = self.time_type # Depature time or Arrival Time
+        data[0]['route_type'] = self.route_type # Outbound or Homebound
 
         id = collection.insert(data)
         #print "Inserted id %s into MongoDB." %id
