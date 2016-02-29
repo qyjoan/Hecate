@@ -77,27 +77,40 @@ Recommendation for routes:
 
 ````
 {'username': 'qyjoan', 
-	{'outbound':
-		{'monday': 
-				{'new_recommendation':,           #True/False
-         'current_departure':,            #Current Departure Time
-         'suggested_departure':,          #Suggested Departure Time (None if not exists)
-         'current_duration':,             #Current Duration (min)
-         'suggested_route_duration':,     #Suggested Duration (None if not exists)
-         'time_saved':                    #Number of minutes saved
-         }
-     }
-   }
-	{'homebound':
-		{'monday': 
-				{'new_recommendation':,
-         'current_departure':,
-         'suggested_departure':,
-         'current_duration':,
-         'suggested_route_duration':,
-         'time_saved':
-         }
-     }
-   }
+ 'outbound':
+	{'monday': 
+		{'new_recommendation':,           #True/False
+         	 'current_departure':,            #Current Departure Time
+         	 'suggested_departure':,          #Suggested Departure Time (None if not exists)
+         	 'current_duration':,             #Current Duration (min)
+         	 'suggested_route_duration':,     #Suggested Duration (None if not exists)
+         	 'time_saved':                    #Number of minutes saved
+        	 },
+         'tuesday': 
+		{'new_recommendation':,           #True/False
+         	 'current_departure':,            #Current Departure Time
+         	 'suggested_departure':,          #Suggested Departure Time (None if not exists)
+         	 'current_duration':,             #Current Duration (min)
+         	 'suggested_route_duration':,     #Suggested Duration (None if not exists)
+         	 'time_saved':                    #Number of minutes saved
+        	 }
+     	},
+'homebound':
+	{'monday': {'new_recommendation':,
+         	    'current_departure':,
+         	    'suggested_departure':,
+         	    'current_duration':,
+         	    'suggested_route_duration':,
+         	    'time_saved':
+         	   },
+         'tuesday': {'new_recommendation':,
+         	    'current_departure':,
+         	    'suggested_departure':,
+         	    'current_duration':,
+         	    'suggested_route_duration':,
+         	    'time_saved':
+         	   }
+     	}
 }
+
 ````
