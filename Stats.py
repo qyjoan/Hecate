@@ -55,27 +55,32 @@ def get_departure(df, cur_departure):
 
 def get_result(rec, cur_dep, sug_dep, cur_dur, sug_dur):
     return {'new_recommendation':rec,
-            'current_departure'cur_dep,
+            'current_departure':cur_dep,
             'suggested_departure':sug_dep,
             'current_duration':cur_dur,
             'suggested_duration':sug_dur,
             'time_saved':cur_dur - sug_dur}
 
+def latest_date(df):
+    dates = df.date.unique()
+    max_date = max([datetime.strptime(d, "%Y-%m-%d").date() for d in dates])
+    return str(max_date)
+
 # if new user
-for user in users.find({'username': sys.argv[1]}):
+for user in users.find():
     username = user['username']
     print user['username']
     
     result = {}
     result['username'] = username
-    result[route_type] = {}
     
     current_starts = None
     for route_type in ['outbound', 'homebound']:
         user_stats = stats.find_one({'username': username})
-
+        result[route_type] = {}
         # get current outbound duration (in min) from user
         if user_stats is None:
+            print "check"
             current_start = user['route']['times'][route_type]['current_start']
         else:
             current_starts = user_stats[route_type]
@@ -90,6 +95,9 @@ for user in users.find({'username': sys.argv[1]}):
                 current_start = current_starts.get(day)['suggested_departure']
 
             sugg = df[df.departure_day == day]
+            sugg = sugg[sugg.date == latest_date(sugg)]
+            print current_start
+            #print sugg
             # get index of current departure time
             cur_ix = sugg[sugg['time'] == current_start].index[0]
 
@@ -102,13 +110,9 @@ for user in users.find({'username': sys.argv[1]}):
                 # find optimal time
                 min_ix = get_departure(sugg, current_start)
                 optimal_start = sugg.ix[min_ix, 'departure_time']
-                js = get_result(True, current_start, optimal_start, current_dur, opt_dur)
+                optimal_start_str = str(optimal_start).split(' ')[1][:5]
+                js = get_result(True, current_start, optimal_start_str, current_dur, opt_dur)
 
             result[route_type][day] = js
-
-    print result
     
-#if user_stats is None:
-#update stats
-#else:
-#id = stats.insert(result)
+    stats.find_one_and_replace({'username':username}, result, upsert=True)
