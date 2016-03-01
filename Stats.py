@@ -1,4 +1,3 @@
-# Work In Progress
 from pymongo import MongoClient
 import pymongo
 from pandas import DataFrame
@@ -12,116 +11,104 @@ routes = db.Travel_Route
 
 stats = db.Stats
 
+# takes in username, and route_type
+# returns a dataframe
+def get_route(username, route_type):
+    runs = []
+    for route in routes.find({'username': username,'route_type': route_type}):
+        duration_str = route['legs'][0]['duration_in_traffic']['text']
+        duration = int(duration_str.split(' ')[0])
+        departure_day = route['departure_day']
+        departure_time = route['departure_time']
+        travel_mode = route['travel_mode']
+        runs.append({'departure_day':departure_day, 'departure_time':departure_time, 'duration':duration, 'route_type':route_type, 'travel_mode':travel_mode})
+    df = DataFrame(runs)
+    # add date column (str)
+    df['date'] = df.departure_time.apply(lambda x: str(x).split(' ')[0])
+    # add time column (str)
+    df['time'] = df.departure_time.apply(lambda x: str(x).split(' ')[1][:5])
+    # add duration_min column (int)
+    df['duration_min'] = df.groupby('departure_day')['duration'].transform(min)
+    return df
+
+# takes in dataframe of possible departures and current departure time
+# returns index of optimal departure time
+def get_departure(df, cur_departure):
+
+    # and pick the closest to current departure time
+    diff = float('inf')
+    min_ix = -1
+
+    for idx in df.index:
+        if df.ix[idx, 'duration'] == df.ix[idx, 'duration_min']:
+            date = df.ix[idx, 'date']
+
+            c_dt = datetime.strptime("{d} {t}".format(d = date, t = cur_departure), "%Y-%m-%d %H:%M")
+            suggested_time = df.ix[idx, 'departure_time'].to_datetime()
+            
+            lag = max(c_dt, suggested_time) - min(c_dt, suggested_time)
+
+            if lag.seconds < diff:
+                diff = lag.seconds
+                min_ix = idx
+    return min_ix
+
+def get_result(rec, cur_dep, sug_dep, cur_dur, sug_dur):
+    return {'new_recommendation':rec,
+            'current_departure'cur_dep,
+            'suggested_departure':sug_dep,
+            'current_duration':cur_dur,
+            'suggested_duration':sug_dur,
+            'time_saved':cur_dur - sug_dur}
+
 # if new user
-for user in users.find({"username": sys.argv[1]}):
-    print user["username"]
+for user in users.find({'username': sys.argv[1]}):
     username = user['username']
+    print user['username']
+    
+    result = {}
+    result['username'] = username
+    result[route_type] = {}
+    
+    current_starts = None
+    for route_type in ['outbound', 'homebound']:
+        user_stats = stats.find_one({'username': username})
 
-    # new user (no stats have been generated for this user)
-    if not stats.find_one({'username': username}):
-
-        for route_type in ['outbound', 'homebound']:
         # get current outbound duration (in min) from user
-            current_duration = user['route']['times'][route_type]['current_duration']
+        if user_stats is None:
             current_start = user['route']['times'][route_type]['current_start']
+        else:
+            current_starts = user_stats[route_type]
 
-            # get routing data from routes
-            runs = []
-            for route in routes.find({'username': username}):
-                # TODO: need to handle the case where duration_in_traffic doesn't exist
-                duration_str = route['legs'][0]['duration_in_traffic']['text']
-                # TODO: need to check if it's always in minutes
-                dur = int(duration_str.split(' ')[0])
-                departure_day = route['departure_day']
-                departure_time = route['departure_time']
-                route_type = route['route_type']
-                travel_mode = route['travel_mode']
-
-                runs.append({'departure_day':departure_day,
-                    'departure_time':departure_time,
-                    'duration':dur,
-                    'route_type':route_type,
-                    'travel_mode': travel_mode})
-
-            df = DataFrame(runs)
-            # add duration_min as a column for each departure day
-            df['duration_min'] = df.groupby('departure_day')['duration'].transform(min)
+        # get routing data from routes
+        df = get_route(username, route_type)
+        # for each user, generate suggestion for each day
         
-            res = df[df['duration'] == df['duration_min']]
-            res = res[res['duration'] < current_duration]
-            # for each user, generate suggestion for each day
-        
-            # {'username': 'qyjoan', {'outbound':{'monday': {'new_recommendation':,
-            #                                                'current_departure':,
-            #                                                'suggested_departure':,
-            #                                                'current_duration':,
-            #                                                'suggested_route_duration':,
-            #                                                'time_saved':
-            #                                                }
-            #                                     }
-            #                        }
-            #                        {'homebound':{'monday':{'new_recommendation':, #True/False
-            #                                                'current_departure':,  
-            #                                                'suggested_departure':,
-            #                                                'current_duration':,
-            #                                                'suggested_route_duration':,
-            #                                                'time_saved':
-            #                                                }
-            #                                     }
-            #                        }
-            #}
-            result = {}
-            result['username'] = username
-            result[route_type] = {}
+        # iterate through all the possible departure times of the day
+        for day in user['route']['days']:
+            if current_starts:
+                current_start = current_starts.get(day)['suggested_departure']
 
-            # iterate through all the possible departure times of the day
-            for day in user['route']['days']:
-                
-                # no recommendation
-                if day not in res.departure_day.unique():
-                    result[route_type][day] = {'new_recoomendation':False,
-                            'current_departure': current_start,
-                            'suggested_departure': None,
-                            'current_duration': current_duration,
-                            'suggested_duration': None,
-                            'time_saved': None}
-                    continue
+            sugg = df[df.departure_day == day]
+            # get index of current departure time
+            cur_ix = sugg[sugg['time'] == current_start].index[0]
 
-                # and pick the closest to current departure time
-                diff = float('inf')
-                sugg = res[res.departure_day == day]
-                min_ix = -1
+            current_dur = sugg.ix[cur_ix, 'duration']
+            opt_dur = sugg.ix[cur_ix, 'duration_min']
+            # current departure time is optimal
+            if current_dur == opt_dur:
+                js = get_result(False, current_start, current_start, current_dur, current_dur)
+            else:
+                # find optimal time
+                min_ix = get_departure(sugg, current_start)
+                optimal_start = sugg.ix[min_ix, 'departure_time']
+                js = get_result(True, current_start, optimal_start, current_dur, opt_dur)
 
-                for idx in sugg.index:
-                    t_sugg = sugg.ix[idx, 'departure_time']
-                
-                    # get date of t_sugg
-                    date = datetime.strftime(t_sugg.date(), "%Y-%m-%d")
-                    c_dt = datetime.strptime("{d} {t}".format(d = date,
-                                                              t = current_start),
-                                             "%Y-%m-%d %H:%M")
-                    lag = max(c_dt, t_sugg.to_datetime()) - min(c_dt, t_sugg.to_datetime())
-                    
-                    if lag.seconds < diff:
-                        diff = lag.seconds
-                        min_ix = idx
-            
-                suggested_time = sugg.ix[min_ix, 'departure_time']
-                suggested_duration = sugg.ix[min_ix, 'duration']
-                time_saved = current_duration - suggested_duration
+            result[route_type][day] = js
 
-                result[route_type][day] = {'current_departure': current_start,
-                        'suggested_departure' : str(suggested_time).split(' ')[1][:-3],
-                        'current_duration': current_duration,
-                        'suggested_route_duration': suggested_duration,
-                        'time_saved' : time_saved}
-
-                if str(suggested_time) != current_start:
-                    result[route_type][day]['new_recommendation'] = True 
-                else:
-                    result[route_type][day]['new_recommendation'] = False
-            
-            print result
-
-    else:
-        pass
+    print result
+    
+#if user_stats is None:
+#update stats
+#else:
+#id = stats.insert(result)
