@@ -15,6 +15,7 @@ import time
 import sys
 from c_Google import *
 from c_User import *
+import pyowm
 
 # TODO: This needs to take into account time, and become date and time?
 def initialise_days(days):

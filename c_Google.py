@@ -20,6 +20,7 @@ import googlemaps.exceptions
 import calendar
 from prettytable import PrettyTable
 import time
+import pyowm
 
 class Google():
 
@@ -66,6 +67,10 @@ class Google():
         print "%s\tRoute Start: %s" %(datetime.now(),self.start_address)
         print "%s\tRoute End: %s" %(datetime.now(),self.end_address)
 
+        # Get the weather for the next 7 days
+        start_weather = self.get_Weather(self.start_address)
+        end_weather = self.get_Weather(self.end_address)
+
         for travel_d in self.travel_dates:
 
             # if arrival time is available, use arrival time as referrence
@@ -86,6 +91,25 @@ class Google():
 
                     # TODO: ERROR HANDLING FOR API FAILURES
                     try:
+                        # Build the JSON Objects for weather
+                        w_start = start_weather.get_weather_at(d)
+                        w_end = end_weather.get_weather_at(d)
+
+                        weather_dict = {}
+                        weather_dict['start_address'] = {}
+                        weather_dict['start_address']['temperature'] = {}
+
+                        weather_dict['start_address']['weather'] = w_start.get_status()
+                        weather_dict['start_address']['temperature']['celcius'] = w_start.get_temperature('celsius')
+                        weather_dict['start_address']['temperature']['fahrenheit'] = w_start.get_temperature('fahrenheit')
+
+                        weather_dict['end_address'] = {}
+                        weather_dict['end_address']['temperature'] = {}
+
+                        weather_dict['end_address']['weather'] = w_end.get_status()
+                        weather_dict['end_address']['temperature']['celcius'] = w_end.get_temperature('celsius')
+                        weather_dict['end_address']['temperature']['fahrenheit'] = w_end.get_temperature('fahrenheit')
+
                         if self.time_type == 'arrival':
                             directions_result = self.gmaps.directions(self.start_address,
                                     self.end_address,
@@ -97,7 +121,7 @@ class Google():
                                     mode=self.travel_mode,
                                     departure_time=d)
 
-                        self.insert_MongoDB(directions_result, d)
+                        self.insert_MongoDB(directions_result, d, weather_dict)
 
                         # Sleep 10 seconds
                         time.sleep(10)
@@ -120,15 +144,21 @@ class Google():
                     except googlemaps.exceptions.TransportError:
                         print "Google Maps Transport Error. Retry Later."
 
-
-
                 # Increment the time by the time step
                 current_time = (datetime.strptime('1900-01-01' + ' ' + str(current_time), '%Y-%m-%d %H:%M:%S') + timedelta(minutes = self.time_step)).time()
 
             print "\t---------------------------------------"
         print "\t---------------------------------------\n\n"
 
-    def insert_MongoDB(self, data, departure_time):
+    def get_Weather(self, address):
+        owm = pyowm.OWM('24d3c38432258a49a6a101c36f314732')
+
+        # Get the weather for the next 7 days
+        fc = owm.daily_forecast(address, limit=7)
+
+        return fc
+
+    def insert_MongoDB(self, data, departure_time, weather_dict):
         # Connect to Mongo DB
         client = MongoClient()
 
@@ -152,6 +182,7 @@ class Google():
         data[0]['travel_mode'] = self.travel_mode
         data[0]['method_time'] = self.time_type # Depature time or Arrival Time
         data[0]['route_type'] = self.route_type # Outbound or Homebound
+        data[0]['weather'] = weather_dict
 
         id = collection.insert(data)
         #print "Inserted id %s into MongoDB." %id
