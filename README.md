@@ -55,11 +55,62 @@ Route information from the Google API is stored in this collection.
 Most of this information is the response from Google, with more details found at https://developers.google.com/maps/documentation/directions/intro
 
 Additional items are added for the purposes of the Hecate application. These include:
-- username: the username from the User collection so data can be linked as needed.
-- start_address: the address this route started from - can be location A or Location B
-- travel_mode: Method of Transportation - options are driving, walking, bicycling, transit
-- departure_time_of_day: The time of day this information relates to
-- departure_day: The day of week that this information relates to
-- method_time: The time method used in the API call - departure or arrival
-- departure_time: The exact date and time used in the API call
-- route_type: The type of route - homebound or outbound
+	- username: the username from the User collection so data can be linked as needed.
+	- start_address: the address this route started from - can be location A or Location B
+	- travel_mode: Method of Transportation - options are driving, walking, bicycling, transit
+	- departure_time_of_day: The time of day this information relates to
+	- departure_day: The day of week that this information relates to
+	- method_time: The time method used in the API call - departure or arrival
+	- departure_time: The exact date and time used in the API call
+	- route_type: The type of route - homebound or outbound
+
+## Stats:
+
+Recommendation for routes:
+
+###Logic:
+
+	- find all google routes results with estimated duration less than user input
+	- for each day that the user travel update with new recommendation (if exists)
+
+###Data Structure:
+
+````
+{'username': 'qyjoan', 
+ 'outbound':
+	{'monday': 
+		{'new_recommendation':,           #True/False
+         	 'current_departure':,            #Current Departure Time
+         	 'suggested_departure':,          #Suggested Departure Time (None if not exists)
+         	 'current_duration':,             #Current Duration (min)
+         	 'suggested_route_duration':,     #Suggested Duration (None if not exists)
+         	 'time_saved':                    #Number of minutes saved
+        	 },
+         'tuesday': 
+		{'new_recommendation':,           #True/False
+         	 'current_departure':,            #Current Departure Time
+         	 'suggested_departure':,          #Suggested Departure Time (None if not exists)
+         	 'current_duration':,             #Current Duration (min)
+         	 'suggested_route_duration':,     #Suggested Duration (None if not exists)
+         	 'time_saved':                    #Number of minutes saved
+        	 }
+     	},
+'homebound':
+	{'monday': {'new_recommendation':,
+         	    'current_departure':,
+         	    'suggested_departure':,
+         	    'current_duration':,
+         	    'suggested_route_duration':,
+         	    'time_saved':
+         	   },
+         'tuesday': {'new_recommendation':,
+         	    'current_departure':,
+         	    'suggested_departure':,
+         	    'current_duration':,
+         	    'suggested_route_duration':,
+         	    'time_saved':
+         	   }
+     	}
+}
+
+````
