@@ -24,7 +24,7 @@ import pyowm
 
 class Google():
 
-    def __init__(self, start_address, end_address, mode, travel_dates, departure_time_min, departure_time_max, arrival_time_min, arrival_time_max, username, time_type, route_type):
+    def __init__(self, start_address, end_address, mode, travel_dates, departure_time_min, departure_time_max, arrival_time_min, arrival_time_max, username, time_type, route_type, current_start):
 
         #  Initialise the necessary variables
         self.start_address = start_address
@@ -38,6 +38,7 @@ class Google():
         self.arrival_time_max = arrival_time_max
         self.time_type = time_type
         self.route_type = route_type
+        self.current_start = current_start
 
         # Number of minutes between each entry.
         self.time_step = 10
@@ -83,72 +84,82 @@ class Google():
                 current_time = self.departure_time_min
                 upper_bound = self.departure_time_max
 
+            if self.current_start < self.departure_time_min:
+                c_date_time = str(travel_d) + ' ' + str(self.current_start)
+                self.get_Data(c_date_time, start_weather, end_weather)
+
             while current_time <= upper_bound:
                 c_date_time = str(travel_d) + ' ' + str(current_time)
-                d = datetime.strptime(c_date_time, '%Y-%m-%d %H:%M:%S')
-                if d >= datetime.today():
-                    print "\t %s\tUpdating Route for departure time: %s" %(datetime.now(), d)
-
-                    # TODO: ERROR HANDLING FOR API FAILURES
-                    try:
-                        # Build the JSON Objects for weather
-                        w_start = start_weather.get_weather_at(d)
-                        w_end = end_weather.get_weather_at(d)
-
-                        weather_dict = {}
-                        weather_dict['start_address'] = {}
-                        weather_dict['start_address']['temperature'] = {}
-
-                        weather_dict['start_address']['weather'] = w_start.get_status()
-                        weather_dict['start_address']['temperature']['celcius'] = w_start.get_temperature('celsius')
-                        weather_dict['start_address']['temperature']['fahrenheit'] = w_start.get_temperature('fahrenheit')
-
-                        weather_dict['end_address'] = {}
-                        weather_dict['end_address']['temperature'] = {}
-
-                        weather_dict['end_address']['weather'] = w_end.get_status()
-                        weather_dict['end_address']['temperature']['celcius'] = w_end.get_temperature('celsius')
-                        weather_dict['end_address']['temperature']['fahrenheit'] = w_end.get_temperature('fahrenheit')
-
-                        if self.time_type == 'arrival':
-                            directions_result = self.gmaps.directions(self.start_address,
-                                    self.end_address,
-                                    mode=self.travel_mode,
-                                    arrival_time=d)
-                        else:
-                            directions_result = self.gmaps.directions(self.start_address,
-                                    self.end_address,
-                                    mode=self.travel_mode,
-                                    departure_time=d)
-
-                        self.insert_MongoDB(directions_result, d, weather_dict)
-
-                        # Sleep 10 seconds
-                        time.sleep(10)
-
-                    except googlemaps.exceptions.ApiError:
-                        print "Google Maps API Error. Retry Later."
-
-                    except googlemaps.exceptions.HTTPError:
-                        print "Google Maps HTTP Error. Retry Later."
-
-                    except googlemaps.exceptions.Timeout:
-                        print "Google Maps Timeout. Trying New Key."
-
-                        # If we are using the first API Key, swap to the second and vice versa
-                        if self.api_key_number == 1:
-                            self.read_API_Key(2)
-                        else:
-                            self.read_API_Key(1)
-
-                    except googlemaps.exceptions.TransportError:
-                        print "Google Maps Transport Error. Retry Later."
+                self.get_Data(c_date_time, start_weather, end_weather)
 
                 # Increment the time by the time step
                 current_time = (datetime.strptime('1900-01-01' + ' ' + str(current_time), '%Y-%m-%d %H:%M:%S') + timedelta(minutes = self.time_step)).time()
 
             print "\t---------------------------------------"
         print "\t---------------------------------------\n\n"
+
+    def get_Data(self, c_date_time, start_weather, end_weather):
+        d = datetime.strptime(c_date_time, '%Y-%m-%d %H:%M:%S')
+        if d >= datetime.today():
+            print "\t %s\tUpdating Route for departure time: %s" %(datetime.now(), d)
+
+            # TODO: ERROR HANDLING FOR API FAILURES
+            try:
+                # Build the JSON Objects for weather
+                w_start = start_weather.get_weather_at(d)
+                w_end = end_weather.get_weather_at(d)
+
+                weather_dict = {}
+                weather_dict['start_address'] = {}
+                weather_dict['start_address']['temperature'] = {}
+
+                weather_dict['start_address']['weather'] = w_start.get_status()
+                weather_dict['start_address']['temperature']['celcius'] = w_start.get_temperature('celsius')
+                weather_dict['start_address']['temperature']['fahrenheit'] = w_start.get_temperature('fahrenheit')
+
+                weather_dict['end_address'] = {}
+                weather_dict['end_address']['temperature'] = {}
+
+                weather_dict['end_address']['weather'] = w_end.get_status()
+                weather_dict['end_address']['temperature']['celcius'] = w_end.get_temperature('celsius')
+                weather_dict['end_address']['temperature']['fahrenheit'] = w_end.get_temperature('fahrenheit')
+
+                if self.time_type == 'arrival':
+                    directions_result = self.gmaps.directions(self.start_address,
+                            self.end_address,
+                            mode=self.travel_mode,
+                            arrival_time=d)
+                else:
+                    directions_result = self.gmaps.directions(self.start_address,
+                            self.end_address,
+                            mode=self.travel_mode,
+                            departure_time=d)
+
+                self.insert_MongoDB(directions_result, d, weather_dict)
+
+                # Sleep 10 seconds
+                time.sleep(10)
+
+            except googlemaps.exceptions.ApiError:
+                print "Google Maps API Error. Retry Later."
+
+            except googlemaps.exceptions.HTTPError:
+                print "Google Maps HTTP Error. Retry Later."
+
+            except googlemaps.exceptions.Timeout:
+                print "Google Maps Timeout. Trying New Key."
+
+                # If we are using the first API Key, swap to the second and vice versa
+                if self.api_key_number == 1:
+                    self.read_API_Key(2)
+                else:
+                    self.read_API_Key(1)
+
+            except googlemaps.exceptions.TransportError:
+                print "Google Maps Transport Error. Retry Later."
+
+            except pyowm.exceptions.not_found_error.NotFoundError:
+                print "Weather not found for specified time. Weather data not collected."
 
     def get_Weather(self, address):
         owm = pyowm.OWM('24d3c38432258a49a6a101c36f314732')

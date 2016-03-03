@@ -92,8 +92,10 @@ def Process_Route(type, user, days):
         # Get the latest data from the API
         # TODO: Only Update the one time that is needed
 
+        current_start_time = datetime.strptime(user.current_start, '%H:%M').time()
+
         # Process the route from A to B (e.g. home to work)
-        g = Google(user.get_Start_Address(), user.get_End_Address(), user.get_Transportation(), travel_days, departure_time_min, departure_time_max, arrival_time_min, arrival_time_max, user.username, 'departure', 'outbound')
+        g = Google(user.get_Start_Address(), user.get_End_Address(), user.get_Transportation(), travel_days, departure_time_min, departure_time_max, arrival_time_min, arrival_time_max, user.username, 'departure', 'outbound', current_start_time)
 
         # If we only want to output, pass the parameter 'output', else we insert into MongoDB
         if sys.argv[1] == 'output':
@@ -104,6 +106,7 @@ def Process_Route(type, user, days):
         # Format the departure time min and max
         departure_time_min = datetime.strptime(user.earliest_home, '%H:%M').time()
         departure_time_max = datetime.strptime(user.latest_home, '%H:%M').time()
+        current_start_time = datetime.strptime(user.current_start, '%H:%M').time()
 
         # No arrival time for homebound trip
         arrival_time_min = None
@@ -113,7 +116,7 @@ def Process_Route(type, user, days):
         # TODO: Only Update the one time that is needed
 
         # Process the route from B to A (e.g. work to home)
-        g = Google(user.get_End_Address(), user.get_Start_Address(), user.get_Transportation(), travel_days, departure_time_min, departure_time_max, arrival_time_min, arrival_time_max, user.username, 'departure', 'homebound')
+        g = Google(user.get_End_Address(), user.get_Start_Address(), user.get_Transportation(), travel_days, departure_time_min, departure_time_max, arrival_time_min, arrival_time_max, user.username, 'departure', 'homebound', current_start_time)
 
         # If we only want to output, pass the parameter 'output', else we insert into MongoDB
         if sys.argv[1] == 'output':
