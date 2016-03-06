@@ -95,13 +95,14 @@ def Process_Route(type, user, days):
         current_start_time = datetime.strptime(user.current_start, '%H:%M').time()
 
         # Process the route from A to B (e.g. home to work)
-        g = Google(user.get_Start_Address(), user.get_End_Address(), user.get_Transportation(), travel_days, departure_time_min, departure_time_max, arrival_time_min, arrival_time_max, user.username, 'departure', 'outbound', current_start_time)
+        g = Google()
+        g.init_Future(user.get_Start_Address(), user.get_End_Address(), user.get_Transportation(), travel_days, departure_time_min, departure_time_max, arrival_time_min, arrival_time_max, user.username, 'departure', 'outbound', current_start_time)
 
         # If we only want to output, pass the parameter 'output', else we insert into MongoDB
         if sys.argv[1] == 'output':
             g.output_data()
         else:
-            g.obtain_Insert_API_Data()
+            g.obtain_Insert_API_Data('future')
     else:
         # Format the departure time min and max
         departure_time_min = datetime.strptime(user.earliest_home, '%H:%M').time()
@@ -112,17 +113,32 @@ def Process_Route(type, user, days):
         arrival_time_min = None
         arrival_time_max = None
 
-        # Get the latest data from the API
-        # TODO: Only Update the one time that is needed
-
         # Process the route from B to A (e.g. work to home)
-        g = Google(user.get_End_Address(), user.get_Start_Address(), user.get_Transportation(), travel_days, departure_time_min, departure_time_max, arrival_time_min, arrival_time_max, user.username, 'departure', 'homebound', current_start_time)
+        g = Google()
+        g.init_Future(user.get_End_Address(), user.get_Start_Address(), user.get_Transportation(), travel_days, departure_time_min, departure_time_max, arrival_time_min, arrival_time_max, user.username, 'departure', 'homebound', current_start_time)
 
         # If we only want to output, pass the parameter 'output', else we insert into MongoDB
         if sys.argv[1] == 'output':
             g.output_data()
         else:
-            g.obtain_Insert_API_Data()
+            g.obtain_Insert_API_Data('future')
+
+def Process_Route_Live(type, user):
+
+    if type == 'outbound':
+        # TODO: Only Update the one time that is needed
+
+        # Process the route from A to B (e.g. home to work)
+        g = Google()
+        g.init_Live(user.get_Start_Address(), user.get_End_Address(), user.get_Transportation(), user.username, 'outbound')
+
+        g.obtain_Insert_API_Data('live')
+
+    else:
+        g = Google()
+        g.init_Live(user.get_End_Address(), user.get_Start_Address(), user.get_Transportation(), user.username, 'outbound')
+
+        g.obtain_Insert_API_Data('live')
 
 if __name__ == '__main__':
     # Connect to MongoDB
@@ -151,11 +167,27 @@ if __name__ == '__main__':
                 # Initialise the days
                 travel_days = initialise_days(user.travel_days)
 
-                # Process Outbound - e.g. home to work
-                Process_Route('outbound', user, travel_days)
+                # If the difference in current time and departure time is less than 5 mins, then get live traffic.
+                today = datetime.today().date()
+                current_start = datetime.strptime(str(today) + ' ' + user.current_start, '%Y-%m-%d %H:%M')
+                current_home = datetime.strptime(str(today) + ' ' + user.current_home, '%Y-%m-%d %H:%M')
 
-                # Process Homebound - e.g. work to home
-                Process_Route('homebound', user, travel_days)
+                outbound_time_diff = (current_time - current_start).total_seconds()/60
+                homebound_time_diff = (current_time - current_home).total_seconds()/60
+
+                if outbound_time_diff <= 5:
+                     # Process Outbound Live Route
+                    Process_Route_Live('outbound', user)
+                else:
+                    # Process Outbound - e.g. home to work
+                    Process_Route('outbound', user, travel_days)
+
+                if homebound_time_diff <= 5:
+                    # Process Outbound Live Route
+                    Process_Route_Live('homebound', user)
+                else:
+                    # Process Homebound - e.g. work to home
+                    Process_Route('homebound', user, travel_days)
 
                 # See how close departure time is and update next check time accordingly.
                 update_Next_Check_Time()
