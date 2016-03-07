@@ -1,0 +1,7 @@
+test-report.xml
+*node_modules*
+*.pyc
+*.DS_Store
+*.idea*
+*.log
+server/build/*

@@ -1,0 +1,17 @@
+queue:
+- name: job-queue
+  mode: pull
+
+- name: resource-queue
+  mode: pull
+
+- name: spin-up-limiter-queue
+  mode: pull
+
+- name: default
+  rate: 500/s
+  bucket_size: 100
+
+- name: stats
+  rate: 100/s
+  bucket_size: 100
