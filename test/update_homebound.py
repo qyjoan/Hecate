@@ -23,7 +23,7 @@ collection = db.User
 
 results = collection.find()
 for item in results:
-    earliest = item["route"]["times"]["homebound"]["earliest_start"]
+    homebound = item["route"]["times"]["homebound"]
     latest = item["route"]["times"]["homebound"]["latest_start"]
     current_start = item["route"]["times"]["homebound"]["current_start"]
 

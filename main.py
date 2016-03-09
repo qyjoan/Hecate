@@ -76,27 +76,18 @@ def update_Next_Check_Time():
     # Else set it to be 1 hour
     if closest_mins <= 120:
         user.set_Next_Check_Time(datetime.now() + timedelta(minutes=15))
+    elif closest_mins <= 240:
+        user.set_Next_Check_Time(datetime.now() + timedelta(hours=4))
     else:
-        user.set_Next_Check_Time(datetime.now() + timedelta(hours=1))
+        user.set_Next_Check_Time(datetime.now() + timedelta(hours=2))
 
 def Process_Route(type, user, days):
 
+    # TODO: Update this to be for days
     if type == 'outbound':
-        # Format the departure time min and max
-        departure_time_min = datetime.strptime(user.earliest_start, '%H:%M').time()
-        departure_time_max = datetime.strptime(user.latest_start, '%H:%M').time()
-
-        # Google module does not support arrival yet
-        arrival_time_min = datetime.strptime(user.get_Earliest_Arrive(), '%H:%M').time()
-        arrival_time_max = datetime.strptime(user.get_Latest_Arrive(), '%H:%M').time()
-        # Get the latest data from the API
-        # TODO: Only Update the one time that is needed
-
-        current_start_time = datetime.strptime(user.current_start, '%H:%M').time()
-
         # Process the route from A to B (e.g. home to work)
         g = Google()
-        g.init_Future(user.get_Start_Address(), user.get_End_Address(), user.get_Transportation(), travel_days, departure_time_min, departure_time_max, arrival_time_min, arrival_time_max, user.username, 'departure', 'outbound', current_start_time)
+        g.init_Future(user.get_Start_Address(), user.get_End_Address(), user.get_Transportation(), travel_days, user.outbound_time, user.homebound_time, user.username, 'departure', 'outbound')
 
         # If we only want to output, pass the parameter 'output', else we insert into MongoDB
         if sys.argv[1] == 'output':
@@ -104,18 +95,9 @@ def Process_Route(type, user, days):
         else:
             g.obtain_Insert_API_Data('future')
     else:
-        # Format the departure time min and max
-        departure_time_min = datetime.strptime(user.earliest_home, '%H:%M').time()
-        departure_time_max = datetime.strptime(user.latest_home, '%H:%M').time()
-        current_start_time = datetime.strptime(user.current_start, '%H:%M').time()
-
-        # No arrival time for homebound trip
-        arrival_time_min = None
-        arrival_time_max = None
-
         # Process the route from B to A (e.g. work to home)
         g = Google()
-        g.init_Future(user.get_End_Address(), user.get_Start_Address(), user.get_Transportation(), travel_days, departure_time_min, departure_time_max, arrival_time_min, arrival_time_max, user.username, 'departure', 'homebound', current_start_time)
+        g.init_Future(user.get_End_Address(), user.get_Start_Address(), user.get_Transportation(), travel_days, user.outbound_time, user.homebound_time, user.username, 'departure', 'homebound')
 
         # If we only want to output, pass the parameter 'output', else we insert into MongoDB
         if sys.argv[1] == 'output':
@@ -169,8 +151,10 @@ if __name__ == '__main__':
 
                 # If the difference in current time and departure time is less than 5 mins, then get live traffic.
                 today = datetime.today().date()
-                current_start = datetime.strptime(str(today) + ' ' + user.current_start, '%Y-%m-%d %H:%M')
-                current_home = datetime.strptime(str(today) + ' ' + user.current_home, '%Y-%m-%d %H:%M')
+                today_weekday = calendar.day_name[datetime.today().weekday()]
+
+                current_start = datetime.strptime(str(today) + ' ' + user.outbound_time[today_weekday]['current_start'], '%Y-%m-%d %H:%M')
+                current_home = datetime.strptime(str(today) + ' ' + user.homebound_time[today_weekday]['current_home'], '%Y-%m-%d %H:%M')
 
                 outbound_time_diff = (current_time - current_start).total_seconds()/60
                 homebound_time_diff = (current_time - current_home).total_seconds()/60

@@ -17,28 +17,62 @@ Each user has a profile in this collection.
     "route" : { <The route to track>
         "times" : {
             "outbound" : {
-                "earliest_start" : <Earliest time this user wants to depart from location A to location B>,
-                "current_start" : <Time this user currently departs from location A to location B>,
-                "latest_arrive" : <Latest time this user wants to arrive at Location B from Location A>,
-                "current_duration" : <Current time this user states it takes to go from Location A to Location B>,
-                "earliest_arrive" :  <Earliest time this user wants to arrive at Location B from Location A>,,
-                "latest_start" : <Latest time this user wants to depart from location A to location B>
+                "Monday": {
+	                "earliest_start" : <Earliest time this user wants to depart from location A to location B>,
+	                "current_start" : <Time this user currently departs from location A to location B>,
+	                "latest_arrive" : <Latest time this user wants to arrive at Location B from Location A>,
+	                "current_duration" : <Current time this user states it takes to go from Location A to Location B>,
+	                "earliest_arrive" :  <Earliest time this user wants to arrive at Location B from Location A>,,
+	                "latest_start" : <Latest time this user wants to depart from location A to location B>
+	            },
+                "Wednesday": {
+	                "earliest_start" : <Earliest time this user wants to depart from location A to location B>,
+	                "current_start" : <Time this user currently departs from location A to location B>,
+	                "latest_arrive" : <Latest time this user wants to arrive at Location B from Location A>,
+	                "current_duration" : <Current time this user states it takes to go from Location A to Location B>,
+	                "earliest_arrive" :  <Earliest time this user wants to arrive at Location B from Location A>,,
+	                "latest_start" : <Latest time this user wants to depart from location A to location B>
+	            },
+                "Friday": {
+	                "earliest_start" : <Earliest time this user wants to depart from location A to location B>,
+	                "current_start" : <Time this user currently departs from location A to location B>,
+	                "latest_arrive" : <Latest time this user wants to arrive at Location B from Location A>,
+	                "current_duration" : <Current time this user states it takes to go from Location A to Location B>,
+	                "earliest_arrive" :  <Earliest time this user wants to arrive at Location B from Location A>,,
+	                "latest_start" : <Latest time this user wants to depart from location A to location B>
+	            }
             },
             "homebound" : {
-                "earliest_start" : <Earliest time this user wants to depart from location B to location A>,
-                "latest_start" : <Latest time this user wants to depart from location B to location A>,
-                "current_duration" : <Current time this user states it takes to go from Location B to Location A>,
-                "current_start" : <Time this user currently departs from location B to location A>
+                "Monday": {
+	                "earliest_start" : <Earliest time this user wants to depart from location B to location A>,
+	                "latest_start" : <Latest time this user wants to depart from location B to location A>,
+	                "current_duration" : <Current time this user states it takes to go from Location B to Location A>,
+	                "current_start" : <Time this user currently departs from location B to location A>
+                },
+                "Wednesday": {
+	                "earliest_start" : <Earliest time this user wants to depart from location B to location A>,
+	                "latest_start" : <Latest time this user wants to depart from location B to location A>,
+	                "current_duration" : <Current time this user states it takes to go from Location B to Location A>,
+	                "current_start" : <Time this user currently departs from location B to location A>
+                },
+                "Friday": {
+	                "earliest_start" : <Earliest time this user wants to depart from location B to location A>,
+	                "latest_start" : <Latest time this user wants to depart from location B to location A>,
+	                "current_duration" : <Current time this user states it takes to go from Location B to Location A>,
+	                "current_start" : <Time this user currently departs from location B to location A>
+                }
             }
         },
         "transportation" : <Method of Transportation - options are driving, walking, bicycling, transit>,
         "days" : [ <List of days the user travels this route> ],
         "address" : {
             "start_location" : {
-                "formatted_address" : <Address of Start Location - location A>
+                "formatted_address" : <Address of Start Location - location A>,
+                "last_updated" : <Date when start location was last updated>
             },
             "end_location" : {
                 "formatted_address" : <Address of Start Location - location B>
+                "last_updated" : <Date when end location was last updated>
             }
         }
     },
@@ -63,6 +97,7 @@ Additional items are added for the purposes of the Hecate application. These inc
 	- method_time: The time method used in the API call - departure or arrival
 	- departure_time: The exact date and time used in the API call
 	- route_type: The type of route - homebound or outbound
+	- live: A true / false flag to indicate if this was live traffic data
 
 ## Stats:
 
@@ -96,7 +131,7 @@ Recommendation for routes:
         	 }
      	},
 'homebound':
-	{'monday': {'new_recommendation':,
+	['monday': {'new_recommendation':,
          	    'current_departure':,
          	    'suggested_departure':,
          	    'current_duration':,
@@ -110,7 +145,7 @@ Recommendation for routes:
          	    'suggested_route_duration':,
          	    'time_saved':
          	   }
-     	}
+     	]
 }
 
 ````

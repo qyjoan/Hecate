@@ -26,18 +26,17 @@ class User():
     end_location = None #string (city, country required)
     transportation = None #{'driving','bicycling','transit','walking'}
     travel_days = None #['Sunday','Monday',...,'Saturday']
-    earliest_start = None #'hh:mm'
-    latest_start = None   #'hh:mm'
-    earliest_arrive = None  #'hh:mm'
-    latest_arrive = None  #'hh:mm'
-    earliest_home = None  #'hh:mm' leaving for home time
-    latest_home = None  #'hh:mm' leaving for home time
-    user = None  #string
-    current_start = None #'hh:mm' current leaving for work time
-    current_duration_start = None #int (minutes)
-    current_home = None #'hh:mm' current leaving for home time
-    current_duration_home = None #int (minutes)
+    outbound_time = None #[{'Sunday', earliest_start, latest_start, earliest_arrive, ...}]
+    homebound_time = None #[{'Sunday', earliest_home, latest_home, current_home, ...}]
     next_check_time = None # Next time to poll the API to get updated details.
+
+    # earliest_home = None  #'hh:mm' leaving for home time
+    # latest_home = None  #'hh:mm' leaving for home time
+    # user = None  #string
+    # current_start = None #'hh:mm' current leaving for work time
+    # current_duration_start = None #int (minutes)
+    # current_home = None #'hh:mm' current leaving for home time
+    # current_duration_home = None #int (minutes)
 
     def __init__(self, username):
         #  Initialise the necessary variables
@@ -61,16 +60,36 @@ class User():
         self.end_location = user['route']['address']['end_location']['formatted_address']
         self.transportation = user['route']['transportation']
         self.travel_days = user['route']['days']
-        self.earliest_start = user['route']['times']['outbound']['earliest_start']
-        self.latest_start = user['route']['times']['outbound']['latest_start']
-        self.earliest_arrive = user['route']['times']['outbound']['earliest_arrive']
-        self.latest_arrive = user['route']['times']['outbound']['latest_arrive']
-        self.current_start = user['route']['times']['outbound']['current_start']
-        self.current_duration_start = user['route']['times']['outbound']['current_duration']
-        self.earliest_home = user['route']['times']['homebound']['earliest_start']
-        self.latest_home = user['route']['times']['homebound']['latest_start']
-        self.current_home = user['route']['times']['homebound']['current_start']
-        self.current_duration_home = user['route']['times']['homebound']['current_duration']
+
+        # TODO: Update these to be a dictionary for each day
+        outbound = {}
+        for day in user['route']['times']['outbound']:
+            d = {}
+            d['day'] = day
+            d['earliest_start'] = user['route']['times']['outbound'][day]['earliest_start']
+            d['latest_start'] = user['route']['times']['outbound'][day]['latest_start']
+            d['earliest_arrive'] = user['route']['times']['outbound'][day]['earliest_arrive']
+            d['latest_arrive'] = user['route']['times']['outbound'][day]['latest_arrive']
+            d['current_start'] = user['route']['times']['outbound'][day]['current_start']
+            d['current_duration_start'] = user['route']['times']['outbound'][day]['current_duration']
+            outbound[day] = d
+
+        self.outbound_time = outbound
+
+        homebound = {}
+        for day in user['route']['times']['homebound']:
+            d = {}
+            d['day'] = day
+            d['earliest_home'] = user['route']['times']['homebound'][day]['earliest_start']
+            d['latest_home'] = user['route']['times']['homebound'][day]['latest_start']
+            d['current_home'] = user['route']['times']['homebound'][day]['current_start']
+            d['current_duration_home'] = user['route']['times']['homebound'][day]['current_duration']
+            homebound[day] = d
+
+        self.homebound_time = homebound
+
+        # TODO: Update these to be a dictionary for each day
+
         self.next_check_time = user['next_check_time']
 
         self.user = user
