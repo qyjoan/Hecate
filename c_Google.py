@@ -24,21 +24,18 @@ import pyowm
 
 class Google():
 
-    def init_Future(self, start_address, end_address, mode, travel_dates, departure_time_min, departure_time_max, arrival_time_min, arrival_time_max, username, time_type, route_type, current_start):
+    def init_Future(self, start_address, end_address, mode, travel_dates, outbound_time, homebound_time, username, time_type, route_type):
 
         #  Initialise the necessary variables
         self.start_address = start_address
         self.end_address = end_address
         self.travel_mode = mode
         self.travel_dates = travel_dates
-        self.departure_time_min = departure_time_min
-        self.departure_time_max = departure_time_max
+        self.outbound_time = outbound_time
+        self.homebound_time = homebound_time
         self.user_name = username
-        self.arrival_time_min = arrival_time_min
-        self.arrival_time_max = arrival_time_max
         self.time_type = time_type
         self.route_type = route_type
-        self.current_start = current_start
         self.live = False
 
         # Number of minutes between each entry.
@@ -60,6 +57,7 @@ class Google():
         self.route_type = route_type
         self.user_name = username
         self.live = True
+        self.time_type = 'Departure'
 
         # Read in the Google API Key from the config file
 
@@ -96,18 +94,19 @@ class Google():
         else:
             for travel_d in self.travel_dates:
 
-                # if arrival time is available, use arrival time as referrence
-                # Note: Problem is using arrival time is that duration_in_traffic
-                #       will not be populated. (https://goo.gl/rnFLAo)
-                if self.time_type == 'arrival':
-                    current_time = self.arrival_time_min
-                    upper_bound = self.arrival_time_max
-                else:
-                    current_time = self.departure_time_min
-                    upper_bound = self.departure_time_max
+                weekday = calendar.day_name[travel_d.weekday()]
 
-                if self.current_start < self.departure_time_min:
-                    c_date_time = str(travel_d) + ' ' + str(self.current_start)
+                if self.route_type == 'outbound':
+                    current_time = datetime.strptime(self.outbound_time[weekday]['earliest_start'], '%H:%M').time()
+                    upper_bound = datetime.strptime(self.outbound_time[weekday]['latest_start'], '%H:%M').time()
+                    current_start = datetime.strptime(self.outbound_time[weekday]['current_start'], '%H:%M').time()
+                else:
+                    current_time = datetime.strptime(self.homebound_time[weekday]['earliest_home'], '%H:%M').time()
+                    upper_bound = datetime.strptime(self.homebound_time[weekday]['latest_home'], '%H:%M').time()
+                    current_start = datetime.strptime(self.homebound_time[weekday]['current_home'], '%H:%M').time()
+
+                if current_start < upper_bound:
+                    c_date_time = str(travel_d) + ' ' + str(current_start)
                     self.get_Data(c_date_time, start_weather, end_weather)
 
                 while current_time <= upper_bound:
