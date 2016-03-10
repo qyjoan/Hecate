@@ -46,8 +46,10 @@ def update_Next_Check_Time():
 
     today = datetime.today().date()
     now = datetime.now()
+    today_weekday = calendar.day_name[datetime.today().weekday()]
 
-    earliest_start = datetime.strptime(str(today) + ' ' + user.earliest_start, '%Y-%m-%d %H:%M')
+    earliest_start = datetime.strptime(str(today) + ' ' + user.outbound_time[today_weekday]['earliest_start'], '%Y-%m-%d %H:%M')
+    earliest_home =  datetime.strptime(str(today) + ' ' + user.homebound_time[today_weekday]['earliest_home'], '%Y-%m-%d %H:%M')
 
     if earliest_start < now:
         earliest_start = datetime.strptime(str(today + timedelta(days=1)) + ' ' + user.earliest_start, '%Y-%m-%d %H:%M')
