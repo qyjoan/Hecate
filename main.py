@@ -52,13 +52,10 @@ def update_Next_Check_Time():
     earliest_home =  datetime.strptime(str(today) + ' ' + user.homebound_time[today_weekday]['earliest_home'], '%Y-%m-%d %H:%M')
 
     if earliest_start < now:
-        earliest_start = datetime.strptime(str(today + timedelta(days=1)) + ' ' + user.earliest_start, '%Y-%m-%d %H:%M')
-
-
-    earliest_home = datetime.strptime(str(today) + ' ' + user.earliest_home, '%Y-%m-%d %H:%M')
+        earliest_start = datetime.strptime(str(today + timedelta(days=1)) + ' ' + user.outbound_time[today_weekday]['earliest_start'], '%Y-%m-%d %H:%M')
 
     if earliest_home < now:
-        earliest_home = datetime.strptime(str(today + timedelta(days=1)) + ' ' + user.earliest_home, '%Y-%m-%d %H:%M')
+       earliest_home =  datetime.strptime(str(today + timedelta(days=1)) + ' ' + user.homebound_time[today_weekday]['earliest_home'], '%Y-%m-%d %H:%M')
 
     # convert to unix timestamp
     start_ts = time.mktime(earliest_start.timetuple())
