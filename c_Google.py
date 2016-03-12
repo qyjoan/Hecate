@@ -24,7 +24,7 @@ import pyowm
 
 class Google():
 
-    def init_Future(self, start_address, end_address, mode, travel_dates, outbound_time, homebound_time, username, time_type, route_type):
+    def init_Future(self, start_address, end_address, mode, travel_dates, outbound_time, homebound_time, username, time_type, route_type, hecate_mode):
 
         #  Initialise the necessary variables
         self.start_address = start_address
@@ -37,6 +37,7 @@ class Google():
         self.time_type = time_type
         self.route_type = route_type
         self.live = False
+        self.hecate_mode = hecate_mode
 
         # Number of minutes between each entry.
         self.time_step = 10
@@ -66,15 +67,25 @@ class Google():
         # Get the handle to the API
         self.gmaps = googlemaps.Client(key=self.api_key)
 
-
     def read_API_Key(self, number):
         # TODO: Add Error Handling if config file does not exist
-        for line in open("hecate.conf"):
+        try:
+            f = open("hecate.conf")
+        except:
+            f = open("../hecate.conf")
+
+        for line in f:
             data = line.split('\n')[0].split('\t')
             api_type = data[0]
             api_key = data[1]
 
-            if api_type == "Google" + str(number):
+            if self.hecate_mode == 'api':
+                if api_type == "Live":
+                    self.api_key = api_key
+                    self.api_key_number = number
+                    print "API Key Updated - Live Key"
+
+            elif api_type == "Google" + str(number):
                 self.api_key = api_key
                 self.api_key_number = number
                 print "API Key Updated - Key #%i" %number
@@ -92,6 +103,8 @@ class Google():
         if mode == 'live':
             self.get_Data_Live(start_weather, end_weather)
         else:
+            return_data = []
+
             for travel_d in self.travel_dates:
 
                 weekday = calendar.day_name[travel_d.weekday()]
@@ -105,19 +118,38 @@ class Google():
                     upper_bound = datetime.strptime(self.homebound_time[weekday]['latest_home'], '%H:%M').time()
                     current_start = datetime.strptime(self.homebound_time[weekday]['current_home'], '%H:%M').time()
 
-                if current_start < upper_bound:
-                    c_date_time = str(travel_d) + ' ' + str(current_start)
-                    self.get_Data(c_date_time, start_weather, end_weather)
+                if self.hecate_mode == 'collect' and current_time < upper_bound:
+                    c_date_time = str(travel_d) + ' ' + str(current_time)
+                    directions_result, weather_dict= self.get_Data(c_date_time, start_weather, end_weather)
+                    hecate_structure = self.build_Hecate_Structure(directions_result, c_date_time, weather_dict)
+                    self.insert_MongoDB(hecate_structure)
 
                 while current_time <= upper_bound:
                     c_date_time = str(travel_d) + ' ' + str(current_time)
-                    self.get_Data(c_date_time, start_weather, end_weather)
+                    directions_result, weather_dict = self.get_Data(c_date_time, start_weather, end_weather)
 
-                    # Increment the time by the time step
-                    current_time = (datetime.strptime('1900-01-01' + ' ' + str(current_time), '%Y-%m-%d %H:%M:%S') + timedelta(minutes = self.time_step)).time()
+                    if self.hecate_mode == 'collect':
+                        hecate_structure = self.build_Hecate_Structure(directions_result, c_date_time, weather_dict)
+
+                        self.insert_MongoDB(hecate_structure)
+
+                        # Increment the time by the time step
+                        current_time = (datetime.strptime('1900-01-01' + ' ' + str(current_time), '%Y-%m-%d %H:%M:%S') + timedelta(minutes = self.time_step)).time()
+
+                        # Sleep 10 seconds
+                        time.sleep(10)
+                    else:
+                        if directions_result <> "Timeout":
+                            hecate_structure = self.build_Hecate_Structure(directions_result, c_date_time, weather_dict)
+                            # Increment the time by the time step
+                            current_time = (datetime.strptime('1900-01-01' + ' ' + str(current_time), '%Y-%m-%d %H:%M:%S') + timedelta(minutes = self.time_step)).time()
+
+                            return_data.append(hecate_structure)
 
                 print "\t---------------------------------------"
             print "\t---------------------------------------\n\n"
+
+            return return_data
 
     def get_Data_Live(self, start_weather, end_weather):
             # TODO: ERROR HANDLING FOR API FAILURES
@@ -201,7 +233,10 @@ class Google():
                     weather_dict['end_address']['weather'] = w_end.get_status()
                     weather_dict['end_address']['temperature']['celcius'] = w_end.get_temperature('celsius')
                     weather_dict['end_address']['temperature']['fahrenheit'] = w_end.get_temperature('fahrenheit')
+            except pyowm.exceptions.not_found_error.NotFoundError:
+                print "Weather not found for specified time. Weather data not collected."
 
+            try:
                 if self.time_type == 'arrival':
                     directions_result = self.gmaps.directions(self.start_address,
                             self.end_address,
@@ -213,16 +248,15 @@ class Google():
                             mode=self.travel_mode,
                             departure_time=d)
 
-                self.insert_MongoDB(directions_result, d, weather_dict)
-
-                # Sleep 10 seconds
-                time.sleep(10)
+                return directions_result, weather_dict
 
             except googlemaps.exceptions.ApiError:
                 print "Google Maps API Error. Retry Later."
+                return "Error", "Error"
 
             except googlemaps.exceptions.HTTPError:
                 print "Google Maps HTTP Error. Retry Later."
+                return "Error", "Error"
 
             except googlemaps.exceptions.Timeout:
                 print "Google Maps Timeout. Trying New Key."
@@ -232,12 +266,11 @@ class Google():
                     self.read_API_Key(2)
                 else:
                     self.read_API_Key(1)
+                return "Timeout", "Timeout"
 
             except googlemaps.exceptions.TransportError:
                 print "Google Maps Transport Error. Retry Later."
-
-            except pyowm.exceptions.not_found_error.NotFoundError:
-                print "Weather not found for specified time. Weather data not collected."
+                return "Error", "Error"
 
     def get_Weather(self, address):
         owm = pyowm.OWM('24d3c38432258a49a6a101c36f314732')
@@ -247,19 +280,8 @@ class Google():
 
         return fc
 
-    def insert_MongoDB(self, data, departure_time, weather_dict):
-        # Connect to Mongo DB
-        client = MongoClient()
-
-        db = client.Hecate
-        collection = db.Travel_Route
-
-        # TODO REMOVE ANY EXISTING RECORDS
-        #collection.remove( {} )
-        #deleted =  collection.delete_many({"$and": [{"user.xid": self.id},
-        #              {"time_created": {"$gt": start_epoch}}]})
-
-        #print "Deleted %i records" %deleted.deleted_count
+    def build_Hecate_Structure(self, data, departure_time, weather_dict):
+        departure_time = datetime.strptime(departure_time, '%Y-%m-%d %H:%M:%S')
 
         data[0]['departure_time'] = departure_time
         data[0]['departure_day'] = calendar.day_name[departure_time.weekday()]
@@ -273,6 +295,22 @@ class Google():
         data[0]['route_type'] = self.route_type # Outbound or Homebound
         data[0]['weather'] = weather_dict
         data[0]['live'] = self.live
+
+        return data
+
+    def insert_MongoDB(self, data):
+        # Connect to Mongo DB
+        client = MongoClient()
+
+        db = client.Hecate
+        collection = db.Travel_Route
+
+        # TODO REMOVE ANY EXISTING RECORDS
+        #collection.remove( {} )
+        #deleted =  collection.delete_many({"$and": [{"user.xid": self.id},
+        #              {"time_created": {"$gt": start_epoch}}]})
+
+        #print "Deleted %i records" %deleted.deleted_count
 
         id = collection.insert(data)
         #print "Inserted id %s into MongoDB." %id

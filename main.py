@@ -46,31 +46,33 @@ def update_Next_Check_Time():
 
     today = datetime.today().date()
     now = datetime.now()
+    today_weekday = calendar.day_name[datetime.today().weekday()]
 
-    earliest_start = datetime.strptime(str(today) + ' ' + user.earliest_start, '%Y-%m-%d %H:%M')
+    try:
+        earliest_start = datetime.strptime(str(today) + ' ' + user.outbound_time[today_weekday]['earliest_start'], '%Y-%m-%d %H:%M')
+        earliest_home =  datetime.strptime(str(today) + ' ' + user.homebound_time[today_weekday]['earliest_home'], '%Y-%m-%d %H:%M')
 
-    if earliest_start < now:
-        earliest_start = datetime.strptime(str(today + timedelta(days=1)) + ' ' + user.earliest_start, '%Y-%m-%d %H:%M')
+        if earliest_start < now:
+            earliest_start = datetime.strptime(str(today + timedelta(days=1)) + ' ' + user.outbound_time[today_weekday]['earliest_start'], '%Y-%m-%d %H:%M')
 
+        if earliest_home < now:
+           earliest_home =  datetime.strptime(str(today + timedelta(days=1)) + ' ' + user.homebound_time[today_weekday]['earliest_home'], '%Y-%m-%d %H:%M')
 
-    earliest_home = datetime.strptime(str(today) + ' ' + user.earliest_home, '%Y-%m-%d %H:%M')
+        # convert to unix timestamp
+        start_ts = time.mktime(earliest_start.timetuple())
+        home_ts = time.mktime(earliest_home.timetuple())
+        now_ts = time.mktime(now.timetuple())
 
-    if earliest_home < now:
-        earliest_home = datetime.strptime(str(today + timedelta(days=1)) + ' ' + user.earliest_home, '%Y-%m-%d %H:%M')
+        # they are now in seconds, subtract and then divide by 60 to get minutes.
+        time_to_start =  int(start_ts - now_ts) / 60
+        time_to_home =  int(home_ts - now_ts) / 60
 
-    # convert to unix timestamp
-    start_ts = time.mktime(earliest_start.timetuple())
-    home_ts = time.mktime(earliest_home.timetuple())
-    now_ts = time.mktime(now.timetuple())
-
-    # they are now in seconds, subtract and then divide by 60 to get minutes.
-    time_to_start =  int(start_ts - now_ts) / 60
-    time_to_home =  int(home_ts - now_ts) / 60
-
-    if time_to_start > time_to_home:
-        closest_mins = time_to_home
-    else:
-        closest_mins = time_to_start
+        if time_to_start > time_to_home:
+            closest_mins = time_to_home
+        else:
+            closest_mins = time_to_start
+    except:
+        closest_mins = 240 #maximum if nothing closer
 
     # If we are 2 hours or less from next closest time, set the next update to be in 15 mins
     # Else set it to be 1 hour
@@ -87,7 +89,7 @@ def Process_Route(type, user, days):
     if type == 'outbound':
         # Process the route from A to B (e.g. home to work)
         g = Google()
-        g.init_Future(user.get_Start_Address(), user.get_End_Address(), user.get_Transportation(), travel_days, user.outbound_time, user.homebound_time, user.username, 'departure', 'outbound')
+        g.init_Future(user.get_Start_Address(), user.get_End_Address(), user.get_Transportation(), travel_days, user.outbound_time, user.homebound_time, user.username, 'departure', 'outbound', 'collect')
 
         # If we only want to output, pass the parameter 'output', else we insert into MongoDB
         if sys.argv[1] == 'output':
@@ -97,7 +99,7 @@ def Process_Route(type, user, days):
     else:
         # Process the route from B to A (e.g. work to home)
         g = Google()
-        g.init_Future(user.get_End_Address(), user.get_Start_Address(), user.get_Transportation(), travel_days, user.outbound_time, user.homebound_time, user.username, 'departure', 'homebound')
+        g.init_Future(user.get_End_Address(), user.get_Start_Address(), user.get_Transportation(), travel_days, user.outbound_time, user.homebound_time, user.username, 'departure', 'homebound', 'collect')
 
         # If we only want to output, pass the parameter 'output', else we insert into MongoDB
         if sys.argv[1] == 'output':
@@ -153,27 +155,36 @@ if __name__ == '__main__':
                 today = datetime.today().date()
                 today_weekday = calendar.day_name[datetime.today().weekday()]
 
-                current_start = datetime.strptime(str(today) + ' ' + user.outbound_time[today_weekday]['current_start'], '%Y-%m-%d %H:%M')
-                current_home = datetime.strptime(str(today) + ' ' + user.homebound_time[today_weekday]['current_home'], '%Y-%m-%d %H:%M')
+                # Loop through until we have the start day.
+                while (today_weekday not in user.homebound_time.keys()):
+                    today = today + timedelta(days = 1)
+                    today_weekday = calendar.day_name[today.weekday()]
 
-                outbound_time_diff = (current_time - current_start).total_seconds()/60
-                homebound_time_diff = (current_time - current_home).total_seconds()/60
+                try:
+                    current_start = datetime.strptime(str(today) + ' ' + user.outbound_time[today_weekday]['current_start'], '%Y-%m-%d %H:%M')
+                    current_home = datetime.strptime(str(today) + ' ' + user.homebound_time[today_weekday]['current_home'], '%Y-%m-%d %H:%M')
 
-                if outbound_time_diff <= 5:
-                     # Process Outbound Live Route
-                    Process_Route_Live('outbound', user)
-                else:
-                    # Process Outbound - e.g. home to work
-                    Process_Route('outbound', user, travel_days)
+                    outbound_time_diff = (current_time - current_start).total_seconds()/60
+                    homebound_time_diff = (current_time - current_home).total_seconds()/60
 
-                if homebound_time_diff <= 5:
-                    # Process Outbound Live Route
-                    Process_Route_Live('homebound', user)
-                else:
-                    # Process Homebound - e.g. work to home
-                    Process_Route('homebound', user, travel_days)
+                    if outbound_time_diff >= 0 and outbound_time_diff <= 5:
+                         # Process Outbound Live Route
+                        Process_Route_Live('outbound', user)
+                    else:
+                        # Process Outbound - e.g. home to work
+                        Process_Route('outbound', user, travel_days)
 
-                # See how close departure time is and update next check time accordingly.
-                update_Next_Check_Time()
+                    if homebound_time_diff >=0 and homebound_time_diff <= 5:
+                        # Process Outbound Live Route
+                        Process_Route_Live('homebound', user)
+                    else:
+                        # Process Homebound - e.g. work to home
+                        Process_Route('homebound', user, travel_days)
 
-                print "User: %s\tRoute Information Updated. Next Update at %s " %(user.username, user.get_Next_Check_Time())
+                except:
+                    print 'No Routes for user %s for day %s. Continuing...' %(user.username, today_weekday)
+
+            # See how close departure time is and update next check time accordingly.
+            update_Next_Check_Time()
+
+            print "User: %s\tRoute Information Updated. Next Update at %s " %(user.username, user.get_Next_Check_Time())
