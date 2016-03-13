@@ -1,4 +1,5 @@
 import requests
+import settings
 import json
 
 from constants import START_ADDRESS, END_ADDRESS, DAYS, TRANSPORT_METHOD, \
@@ -68,9 +69,9 @@ def consumeGETRequestSync():
 
     params[HOMEBOUND_TIMES] = times
 
-    url = 'https://54.191.104.28:5000/hecate/api/v1.0/route'
+    url = settings.URL
 
-    access_token = 'pPtnW5rm3FolTDVcGUvBH89CfC8lqR'
+    access_token = settings.ACCESS_TOKEN
     headers = {'Authorization': 'Bearer {}'.format(access_token)}
 
     # Get token
