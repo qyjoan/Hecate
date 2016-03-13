@@ -74,9 +74,6 @@ def consumeGETRequestSync():
     access_token = settings.ACCESS_TOKEN
     headers = {'Authorization': 'Bearer {}'.format(access_token)}
 
-    # Get token
-    # curl -k -X POST -d 'client_id=Yvr8gDSyIsqQ1e6W0Uj43WXuXpT9JsPZ0sm9UFyr&grant_type=password&username=api&password=B:5"cY^{fTLKjKhm' https://54.191.104.28:5000/oauth/token
-
     # call get service with headers and params
     response = requests.post(url, headers = headers,data = json.dumps(params), verify=False)
 

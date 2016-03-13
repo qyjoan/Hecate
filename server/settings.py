@@ -17,5 +17,5 @@ except ImportError:
 
 if settingslocal:
     for setting in dir(settingslocal):
-        if setting.upper() == setting and setting.endswith('_ENCRYPTION_KEY_STRING'):
+        if setting.upper() == setting:
             globals()[setting.upper()] = getattr(settingslocal, setting)
