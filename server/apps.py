@@ -27,6 +27,7 @@ class RouteHandler(webapp2.RedirectHandler):
             latest_return_time=body_dict.get('latest_return')
         )
         route.put()
+        # call the backend
         self.response.headers['Content-Type'] = 'application/json'
         self.response.out.write(json.dumps(get_best_times_for_route(route)))
 

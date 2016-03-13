@@ -5,3 +5,4 @@ test-report.xml
 *.idea*
 *.log
 server/build/*
+settingslocal.py
