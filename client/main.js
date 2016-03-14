@@ -3,17 +3,29 @@ var ReactDOM = require('react-dom');
 var request = require('browser-request');
 var urls = require('./urls');
 
+var Button = require('react-bootstrap').Button;
 var ButtonInput = require('react-bootstrap').ButtonInput;
 var Input = require('react-bootstrap').Input;
 var Well = require('react-bootstrap').Well;
 
 
+var Splash = React.createClass({
+    render: function() {
+        return (
+            <Well>
+                <h1>Welcome to Zombocom</h1>
+                <h3>Let us optimize your route</h3>
+                <Button onClick={this.props.start}>Yes Please!</Button>
+            </Well>
+        );
+    }
+});
+
+
 var SignUp = React.createClass({
     submit: function(e) {
         e.preventDefault();
-        console.log(this.props.setResults);
-        // TODO: Fix body
-        console.log(this.refs.home.getValue().trim());
+        console.log(this.refs.days.getValue());
         var options = {
             "method": "POST",
             "url": urls.ROUTE,
@@ -21,17 +33,17 @@ var SignUp = React.createClass({
                 start_address: this.refs.home.getValue().trim(),
                 end_address: this.refs.work.getValue().trim(),
                 transport_method: this.refs.mode.getValue().trim(),
-                date: this.refs.date.getValue().trim(),
+                days: this.refs.days.getValue(),
 
                 current_start: this.refs.leave_time.getValue().trim(),
                 leave_duration: this.refs.leave_duration.getValue().trim(),
                 earliest_start: this.refs.leave_early.getValue().trim(),
-                leave_late: this.refs.leave_late.getValue().trim(),
+                latest_start: this.refs.leave_late.getValue().trim(),
 
-                return_time: this.refs.return_time.getValue().trim(),
+                current_home: this.refs.return_time.getValue().trim(),
                 return_duration: this.refs.return_duration.getValue().trim(),
-                return_early: this.refs.return_early.getValue().trim(),
-                return_late: this.refs.return_late.getValue().trim()
+                earliest_home: this.refs.return_early.getValue().trim(),
+                latest_home: this.refs.return_late.getValue().trim()
             },
             "json": true
         };
@@ -50,13 +62,22 @@ var SignUp = React.createClass({
                     <Input ref="home" type="text" label="Where are leaving from?" placeholder="1600 Amphitheatre Pkwy, Mountain View, CA 94043" />
                     <Input ref="work" type="text" label="Where are going?" placeholder="1401 N Shoreline Blvd, Mountain View, CA 94043" />
                     <Input ref="mode" type="select" label="What is your mode of transport?" placeholder="select">
-                        <option value="car">Personal Vehicle</option>
-                        <option value="share">Ride Share</option>
-                        <option value="bike">Bike</option>
-                        <option value="public">Public Transit</option>
-                        <option value="walk">Walking</option>
+                        <option value="driving">Personal Vehicle</option>
+                        <option value="driving">Ride Share</option>
+                        <option value="bycling">Bike</option>
+                        <option value="transit">Public Transit</option>
+                        <option value="walking">Walking</option>
                     </Input>
-                    <Input ref="date" type="text" label="What day do you plan on traveling?" placeholder="03/18/2016" />
+                    <Input ref="days" type="select" label="What days of the week? (shift/control click to select all that apply)" multiple>
+                        <option value="Monday">Monday</option>
+                        <option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option>
+                        <option value="Thursday">Thursday</option>
+                        <option value="Friday">Friday</option>
+                        <option value="Saturday">Saturday</option>
+                        <option value="Sunday">Sunday</option>
+                    </Input>
+
                     <Input ref="leave_time" type="text" label="What time do you plan on leaving?" placeholder="7:55am" />
                     <Input ref="leave_duration" type="text" label="How many minutes do you expect it to take?" placeholder="30" />
                     <Input ref="leave_early" type="text" label="When is the earliest you would consider leaving?" placeholder="7:00am" />
@@ -101,13 +122,20 @@ var Results = React.createClass({
 var Main = React.createClass({
     getInitialState: function() {
         return {
-            "results": null
+            "results": null,
+            "splash": true
         };
     },
     setResults: function(results) {
         this.setState({"results": results});
     },
+    start: function() {
+        this.setState({"splash": false});
+    },
     render: function() {
+        if (this.state.splash) {
+            return (<Splash start={this.start} />);
+        }
         if (this.state.results) {
             return (<Results results={this.state.results} />);
         } else {

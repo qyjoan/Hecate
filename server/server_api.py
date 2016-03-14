@@ -1,71 +1,46 @@
-import requests
-import settings
 import json
+import logging
+import settings
+import urllib
+
+from google.appengine.api import urlfetch
 
 from constants import START_ADDRESS, END_ADDRESS, DAYS, TRANSPORT_METHOD, \
     OUTBOUND, HOMEBOUND, EARLIEST_START, LATEST_START, CURRENT_START, \
     EARLIEST_HOME, LATEST_HOME, CURRENT_HOME, OUTBOUND_HOMEBOUND, \
     OUTBOUND_TIMES, HOMEBOUND_TIMES
 
-def consumeGETRequestSync():
+def consumeGETRequestSync(payload):
     params = {}
-    params[START_ADDRESS] = '10 Bourke Street, Sydney, NSW, Australia'
-    params[END_ADDRESS] = '320 Pitt Street, Sydney, NSW, Australia'
-    params[DAYS] = ['Monday','Tuesday', 'Friday']
+    params[START_ADDRESS] = payload.get(START_ADDRESS)
+    params[END_ADDRESS] = payload.get(END_ADDRESS)
+    params[DAYS] = payload.get(DAYS)
     params[TRANSPORT_METHOD] = 'driving'
     params[OUTBOUND_HOMEBOUND] = 'outbound'
 
     # Setup outbound days and times
-    params[OUTBOUND_TIMES] = {}
     times = {}
 
-    # Monday
-    time = {}
-    time[EARLIEST_START] = '07:30'
-    time[LATEST_START] = '08:30'
-    time[CURRENT_START] = '08:00'
-    times['Monday'] = time
-
-    # Tuesday
-    time = {}
-    time[EARLIEST_START] = '07:30'
-    time[LATEST_START] = '08:30'
-    time[CURRENT_START] = '08:00'
-    times['Tuesday'] = time
-
-    # Friday
-    time = {}
-    time[EARLIEST_START] = '07:00'
-    time[LATEST_START] = '08:00'
-    time[CURRENT_START] = '08:00'
-    times['Friday'] = time
+    for day in payload.get(DAYS):
+        # Monday
+        time = {}
+        time[EARLIEST_START] = payload.get(EARLIEST_START)
+        time[LATEST_START] = payload.get(LATEST_START)
+        time[CURRENT_START] = payload.get(CURRENT_START)
+        times[day] = time
 
     params[OUTBOUND_TIMES] = times
 
     # Setup homebound days and times
-    params[HOMEBOUND_TIMES] = {}
     times = {}
 
-    # Monday
-    time = {}
-    time[EARLIEST_HOME] = '17:30'
-    time[LATEST_HOME] = '18:30'
-    time[CURRENT_HOME] = '18:00'
-    times['Monday'] = time
-
-    # Tuesday
-    time = {}
-    time[EARLIEST_HOME] = '17:30'
-    time[LATEST_HOME] = '18:30'
-    time[CURRENT_HOME] = '18:00'
-    times['Tuesday'] = time
-
-    # Friday
-    time = {}
-    time[EARLIEST_HOME] = '17:00'
-    time[LATEST_HOME] = '18:00'
-    time[CURRENT_HOME] = '18:00'
-    times['Friday'] = time
+    for day in payload.get(DAYS):
+        # Monday
+        time = {}
+        time[EARLIEST_HOME] = payload.get(EARLIEST_HOME)
+        time[LATEST_HOME] = payload.get(LATEST_HOME)
+        time[CURRENT_HOME] = payload.get(CURRENT_HOME)
+        times[day] = time
 
     params[HOMEBOUND_TIMES] = times
 
@@ -75,12 +50,16 @@ def consumeGETRequestSync():
     headers = {'Authorization': 'Bearer {}'.format(access_token)}
 
     # call get service with headers and params
-    response = requests.post(url, headers = headers,data = json.dumps(params), verify=False)
+    response = urlfetch.fetch(
+        url=url,
+        payload=json.dumps(params),
+        method=urlfetch.POST,
+        headers=headers
+    )
 
-    print "code:"+ str(response.status_code)
-    print "******************"
-    print "headers:"+ str(response.headers)
-    print "******************"
-    print "content:"+ str(response.text)
-
-consumeGETRequestSync()
+    logging.info("=========================")
+    logging.info("code:"+ str(response.status_code))
+    logging.info("headers:"+ str(response.headers))
+    logging.info("content:"+ str(response.text))
+    logging.info("=========================")
+    return response.text
