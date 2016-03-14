@@ -65,10 +65,13 @@ def consumeGETRequestSync():
     params['homebound_times'] = times
 
 
-    url = 'https://...:5000/hecate/api/v1.0/route'
+    url = 'https://54.191.104.28:5000/hecate/api/v1.0/route'
 
-    access_token = '...'
+    access_token = 'WAhEUONIBRTczHQRD9MyYCNUdf1Zr4'
     headers = {'Authorization': 'Bearer {}'.format(access_token)}
+
+    # Get token
+    # curl -k -X POST -d 'client_id=Yvr8gDSyIsqQ1e6W0Uj43WXuXpT9JsPZ0sm9UFyr&grant_type=password&username=api&password=B:5"cY^{fTLKjKhm' https://54.191.104.28:5000/oauth/token
 
     # call get service with headers and params
     response = requests.post(url, headers = headers,data = json.dumps(params), verify=False)

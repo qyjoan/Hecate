@@ -175,10 +175,10 @@ class Google():
                     weather_dict['end_address']['temperature']['celcius'] = w_end.get_temperature('celsius')
                     weather_dict['end_address']['temperature']['fahrenheit'] = w_end.get_temperature('fahrenheit')
 
-                    directions_result = self.gmaps.directions(self.start_address,
-                            self.end_address,
-                            mode=self.travel_mode,
-                            departure_time=datetime.now())
+                directions_result = self.gmaps.directions(self.start_address,
+                        self.end_address,
+                        mode=self.travel_mode,
+                        departure_time=datetime.now())
 
                 self.insert_MongoDB(directions_result, datetime.now(), weather_dict)
 
@@ -250,8 +250,11 @@ class Google():
 
                 return directions_result, weather_dict
 
-            except googlemaps.exceptions.ApiError:
-                print "Google Maps API Error. Retry Later."
+            except googlemaps.exceptions.ApiError as e:
+                if e == 'NOT FOUND':
+                    "Google Maps API Error, Address Not Found"
+                else:
+                    print "Google Maps API Error. Retry Later."
                 return "Error", "Error"
 
             except googlemaps.exceptions.HTTPError:
