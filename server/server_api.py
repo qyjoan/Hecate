@@ -47,14 +47,18 @@ def consumeGETRequestSync(payload):
     url = settings.URL
 
     access_token = settings.ACCESS_TOKEN
-    headers = {'Authorization': 'Bearer {}'.format(access_token)}
+    headers = {
+        'Authorization': 'Bearer {}'.format(access_token),
+        'Content-Type': 'application/json'
+    }
 
     # call get service with headers and params
     response = urlfetch.fetch(
         url=url,
         payload=json.dumps(params),
         method=urlfetch.POST,
-        headers=headers
+        headers=headers,
+        validate_certificate=False
     )
 
     logging.info("=========================")
