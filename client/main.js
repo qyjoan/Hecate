@@ -13,7 +13,7 @@ var Splash = React.createClass({
     render: function() {
         return (
             <Well>
-                <h1>Welcome to Zombocom</h1>
+                <h1>Welcome to Hecate!</h1>
                 <h3>Let us optimize your route</h3>
                 <Button onClick={this.props.start}>Yes Please!</Button>
             </Well>
@@ -51,6 +51,7 @@ var SignUp = React.createClass({
             if (er) {
                 console.log(er)
             } else {
+                console.log(body);
                 this.props.setResults(body);
             }
         }.bind(this));

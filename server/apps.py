@@ -19,7 +19,7 @@ class RouteHandler(webapp2.RedirectHandler):
         response = server_api.consumeGETRequestSync(body_dict)
 
         self.response.headers['Content-Type'] = 'application/json'
-        self.response.out.write(json.dumps(get_best_times_for_route(route)))
+        self.response.out.write(response)
 
 
 class HomeRouteHandler(webapp2.RequestHandler):
