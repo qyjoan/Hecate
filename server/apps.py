@@ -1,12 +1,9 @@
 
 import json
 import logging
-import models
 import os
 import webapp2
 import server_api
-
-from predict import get_best_times_for_route
 
 from google.appengine.ext.webapp import template
 
