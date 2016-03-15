@@ -1,4 +1,0 @@
-cron:
-- description: todo 
-  url: /cron/todo
-  schedule: every 10 mins

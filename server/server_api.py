@@ -69,7 +69,7 @@ def consumeGETRequestSync(payload):
     logging.info("=========================")
     logging.info("content:"+ str(response.content))
     logging.info("=========================")
-    logging.info("json:"+ json.load(response.content))
+    logging.info("json:"+ json.loads(response.content))
     logging.info("=========================")
     logging.info("=========================")
     return response.content
