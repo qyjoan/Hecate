@@ -106,7 +106,6 @@ class Google():
             return_data = []
 
             for travel_d in self.travel_dates:
-
                 weekday = calendar.day_name[travel_d.weekday()]
 
                 if self.route_type == 'outbound':

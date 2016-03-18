@@ -88,8 +88,6 @@ class User():
 
         self.homebound_time = homebound
 
-        # TODO: Update these to be a dictionary for each day
-
         self.next_check_time = user['next_check_time']
 
         self.user = user
