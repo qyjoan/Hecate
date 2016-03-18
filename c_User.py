@@ -30,19 +30,8 @@ class User():
     homebound_time = None #[{'Sunday', earliest_home, latest_home, current_home, ...}]
     next_check_time = None # Next time to poll the API to get updated details.
 
-    # earliest_home = None  #'hh:mm' leaving for home time
-    # latest_home = None  #'hh:mm' leaving for home time
-    # user = None  #string
-    # current_start = None #'hh:mm' current leaving for work time
-    # current_duration_start = None #int (minutes)
-    # current_home = None #'hh:mm' current leaving for home time
-    # current_duration_home = None #int (minutes)
-
-    def __init__(self, username):
-        #  Initialise the necessary variables
+    def Initialise(self, username):
         self.username = username
-
-    def Initialise(self):
 
         # Connect to MongoDB
         client = MongoClient()
@@ -61,7 +50,6 @@ class User():
         self.transportation = user['route']['transportation']
         self.travel_days = user['route']['days']
 
-        # TODO: Update these to be a dictionary for each day
         outbound = {}
         for day in user['route']['times']['outbound']:
             d = {}
@@ -91,6 +79,26 @@ class User():
         self.next_check_time = user['next_check_time']
 
         self.user = user
+
+    # CreateUser: Creates a user record in the Mongo Collection
+    # Parameter: user - a dictionary object with all necessary items to populate the record
+    # Returns: Error Message, or Success.
+    def CreateUser(self, user):
+
+        # Connect to MongoDB
+        client = MongoClient()
+
+        db = client.Hecate
+        collection = db.User
+
+        user_count = collection.find_one({'username': user['username']})
+
+        if user_count > 0:
+            return "Error: User Already Exists"
+
+        result = collection.insert(user)
+
+        return "User Successfully Created"
 
     def print_Details(self):
         print "Name: %s" %self.name

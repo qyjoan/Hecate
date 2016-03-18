@@ -7,6 +7,7 @@ import sys
 import ast
 sys.path.append('../')
 from c_Google import *
+from c_User import *
 import urlparse
 
 def initialise_days(days):
@@ -35,10 +36,21 @@ def initialise_days(days):
 
 app = Flask(__name__)
 
-@app.route('/hecate/api/v1.0/users', methods=['GET'])
+@app.route('/hecate/api/v1.0/create_user', methods=['POST'])
 @oauth.require_oauth()
-def get_users():
-    return 'This will get the list of users'
+def create_user():
+    data = {}
+    print type(request.data)
+    try:
+        data = ast.literal_eval(request.data)
+    except ValueError as e:
+        print ( "<p>Error: %s</p>" % e.message )
+    print data
+
+    user = User()
+    response = user.CreateUser(data)
+
+    return response
 
 @app.route('/hecate/api/v1.0/route', methods=['POST'])
 @oauth.require_oauth()

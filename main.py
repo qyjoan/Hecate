@@ -145,8 +145,8 @@ if __name__ == '__main__':
 
             # Loop through the users, calling the API to update route information and log to route DB
             for item in c:
-                user = User(item["username"])
-                user.Initialise()
+                user = User()
+                user.Initialise(item["username"])
 
                 # Initialise the days
                 travel_days = initialise_days(user.travel_days)
