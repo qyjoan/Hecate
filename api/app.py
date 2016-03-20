@@ -9,6 +9,8 @@ sys.path.append('../')
 from c_Google import *
 from c_User import *
 import urlparse
+import jsonpickle
+import os
 
 def initialise_days(days):
 
@@ -36,11 +38,57 @@ def initialise_days(days):
 
 app = Flask(__name__)
 
+@app.route('/hecate/api/v1.0/getUser', methods=['GET'])
+@oauth.require_oauth()
+def get_user():
+    try:
+        user_Object = User()
+
+        # Ensure the username hasn't come through with quotes at the beginning and end
+        if request.data.startswith('"') and request.data.endswith('"'):
+            username = request.data[1:-1]
+        else:
+            username = request.data
+
+        # Initialise the user object
+        response = user_Object.Initialise(username)
+
+        return user_Object.JSON_Output()
+        #return jsonpickle.encode(user_Object)
+
+    except Exception, e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
+
+@app.route('/hecate/api/v1.0/updateUser', methods=['POST'])
+@oauth.require_oauth()
+def update_user_route():
+    try:
+        data = {}
+        data = json.loads(request.data)
+        username = data['username']
+
+        user_Object = User()
+
+        # Initialise the user object
+        user_Object.Initialise(username)
+
+        response = user_Object.update_Entire_User(json.dumps(data))
+
+        if response > 0:
+            return "User successfully updated."
+        else:
+            return "ERROR: User Not Updated"
+    except Exception, e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno, e)
+
 @app.route('/hecate/api/v1.0/create_user', methods=['POST'])
 @oauth.require_oauth()
 def create_user():
     data = {}
-    print type(request.data)
     try:
         data = ast.literal_eval(request.data)
     except ValueError as e:
