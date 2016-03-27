@@ -1,36 +1,34 @@
 from pymongo import MongoClient
 import pymongo
 from pandas import DataFrame
-from datetime import datetime
-import sys
+from datetime import datetime, timedelta
+import googlemaps
+import sys,os
 
 client = MongoClient()
 db = client.Hecate
 users = db.User
 routes = db.Travel_Route
-
 stats = db.Stats
+
+api_key = os.environ['GOOGLE_MAP_DIRECTIONS_API_KEY']
+gmaps = googlemaps.Client(key=api_key)
 
 # takes in username, and route_type
 # returns a dataframe
-def get_route(username, route_type, defense):
+def get_route(username, route_type):
     runs = []
-    if routes.find({'username': username, 'route_type': route_type}).count() == 0:
+    if routes.find({'username': username, 'route_type': route_type, 'live': False}).count() == 0:
         return
-    for route in routes.find({'username': username,'route_type': route_type}):
-        duration_str = route['legs'][0]['duration_in_traffic']['text']
-        duration = int(duration_str.split(' ')[0])
+    for route in routes.find({'username': username,'route_type': route_type, 'live': False}):
+        duration_sec = route['legs'][0]['duration_in_traffic']['value']
         departure_day = route['departure_day']
         departure_time = route['departure_time']
         travel_mode = route['travel_mode']
         created_date = datetime.strptime(route['created_date'], "%c").date()
-        ####################################################
-        # temporary defense for am data showing on homebound
-        ####################################################
-        if not (defense == False and str(departure_time).split(' ')[1][0] == '0' and route_type == 'homebound'):
-            runs.append({'departure_day':departure_day,
+        runs.append({'departure_day':departure_day,
                      'departure_time':departure_time,
-                     'duration':duration,
+                     'duration':duration_sec,
                      'route_type':route_type,
                      'travel_mode':travel_mode,
                      'created_date':created_date})
@@ -42,6 +40,23 @@ def get_route(username, route_type, defense):
     # add duration_min column (int)
     df['duration_min'] = df.groupby(['created_date','departure_day'])['duration'].transform(min)
     return df
+
+# query_route is called when current departure time is missing
+# from Mongo to get the Google approximation of current departure
+def query_route(user, route_type, dt, time):
+    start_location = user['route']['address']['start_location']['formatted_address']
+    end_location = user['route']['address']['end_location']['formatted_address']
+    mode = user['route']['transportation']
+    dep_time = datetime.strptime("{} {}".format(dt, time), "%Y-%m-%d %M:%S")
+    #print dep_time, mode
+    if dep_time <= datetime.now():
+        dep_time += timedelta(days=7)
+    
+    if route_type == 'outbound':
+        dirs = gmaps.directions(start_location, end_location, mode=mode, departure_time=dep_time)
+    else:
+        dirs = gmaps.directions(end_location, start_location, mode=mode, departure_time=dep_time) 
+    return dirs[0]
 
 # takes in dataframe of possible departures and current departure time
 # returns index of optimal departure time
@@ -93,12 +108,12 @@ for user in users.find():
         result[route_type] = {}
         # get current outbound duration (in min) from user
         current_starts = user['route']['times'][route_type]
-        for d in current_starts:
-            print "{}: {}, {}".format(d, current_starts[d]['current_start'],
-                                      current_starts[d]['current_duration'])
+        #for d in current_starts:
+        #    print "{}: {}, {}".format(d, current_starts[d]['current_start'],
+        #                              current_starts[d]['current_duration'])
 
         # get routing data from routes
-        df = get_route(username, route_type, False)
+        df = get_route(username, route_type)
         if df is None:
             print "Cannot find route information for {}.".format(username)
             continue
@@ -113,32 +128,29 @@ for user in users.find():
             #print current_start
             #print sugg
             # get index of current departure time
-            print day, current_start
-            print "suggested time: {}".format(sugg['time'].unique())
+            #print day, current_start
+            #print "suggested time: {}".format(sugg['time'].unique())
             
             ############################################################
-            # temporary bug fix
+            # 
             ############################################################
             if (sugg['time'] == current_start).sum() == 0:
-                pm_df = get_route(username, 'homebound', True)
-                pm_sugg = pm_df[pm_df.departure_day == day]
-                pm_sugg = pm_sugg[pm_sugg.created_date == latest_date(pm_sugg)].drop_duplicates()
-                if (pm_sugg['time'] == current_start).sum() > 0:
-                    row = pm_sugg[pm_sugg['time'] == current_start]
-                    row.index = ['cur']
-                    sugg = sugg.append(row)
-                    sugg['duration_min'] = sugg.groupby(['created_date','departure_day'])['duration'].transform(min)
-                else:
+                try:
+                    r = query_route(user, route_type, sugg.date.unique()[0], current_start)
+                except:
                     print "Skipping {} for user {} on {} due to missing data.".format(route_type, username, day)
                     continue
+                current_dur = r['legs'][0]['duration_in_traffic']['value']
+                print "Current duration queried: {}".format(current_dur)
+            else:
+                cur_ix = sugg[sugg['time'] == current_start].index[0]
+                current_dur = sugg.ix[cur_ix, 'duration']
+            
             ###########################################################
             
-            cur_ix = sugg[sugg['time'] == current_start].index[0]
-
-            current_dur = sugg.ix[cur_ix, 'duration']
-            opt_dur = sugg.ix[cur_ix, 'duration_min']
+            opt_dur = sugg.duration.min()
             # current departure time is optimal
-            if current_dur == opt_dur:
+            if current_dur <= opt_dur:
                 js = get_result(False, current_start, current_start, current_dur, current_dur)
             
             else:
@@ -158,15 +170,19 @@ for user in users.find():
     
     # update user table
     user.pop('_id')
-    print "-----------------------------"
-    print "Outbound:"
-    current_starts = user['route']['times']['outbound']
-    for d in current_starts:
-        print "{}: {}, {}".format(d, current_starts[d]['current_start'],
-                                      current_starts[d]['current_duration'])
-    print "Inbound:"
-    current_starts = user['route']['times']['homebound']
-    for d in current_starts:
-        print "{}: {}, {}".format(d, current_starts[d]['current_start'],
-                                      current_starts[d]['current_duration'])
+    user['updated_at'] = datetime.now()
+    result['updated_at'] = datetime.now()
+    #print "-----------------------------"
+    #print "Outbound:"
+    #current_starts = user['route']['times']['outbound']
+    #for d in current_starts:
+    #    print "{}: {}, {}".format(d, current_starts[d]['current_start'],
+    #                                  current_starts[d]['current_duration'])
+    #print "Inbound:"
+    #current_starts = user['route']['times']['homebound']
+    #for d in current_starts:
+    #    print "{}: {}, {}".format(d, current_starts[d]['current_start'],
+    #                                  current_starts[d]['current_duration'])
+    print user
+    stats.insert_one(result)
     users.find_one_and_replace({'username':username}, user, upsert=False)
