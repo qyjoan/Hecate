@@ -4,6 +4,10 @@ import json
 import sys
 import datetime
 import urllib
+import ast
+import jsonpickle
+import os
+
  
 def consumeGETRequestSync():
     params = {}
@@ -138,7 +142,7 @@ def create_User():
 
     url = 'https://.../hecate/api/v1.0/create_user'
 
-    access_token = '...'
+    access_token = 'WAhEUONIBRTczHQRD9MyYCNUdf1Zr4'
     headers = {
         'Authorization': 'Bearer {}'.format(access_token),
         'Content-Type': 'application/json'
@@ -153,9 +157,65 @@ def create_User():
     print "******************"
     print "content:"+ str(response.text)
 
+def get_User():
+    url = 'https://54.191.104.28:5000/hecate/api/v1.0/getUser'
+
+    access_token = 'WAhEUONIBRTczHQRD9MyYCNUdf1Zr4'
+    headers = {
+        'Authorization': 'Bearer {}'.format(access_token),
+    }
+
+    # call get service with headers and params
+    response = requests.get(url, headers = headers,data = sys.argv[2], verify=False)
+
+    print "code:"+ str(response.status_code)
+    print "******************"
+    print "headers:"+ str(response.headers)
+    print "******************"
+    print "content:"+ str(response.text)
+
+def update_User():
+    try:
+        url = 'https://54.191.104.28:5000/hecate/api/v1.0/getUser'
+
+        access_token = 'WAhEUONIBRTczHQRD9MyYCNUdf1Zr4'
+        headers = {
+            'Authorization': 'Bearer {}'.format(access_token),
+        }
+
+        # call get service with headers and params
+        response = requests.get(url, headers = headers,data = json.dumps(sys.argv[2]), verify=False)
+
+        user_details = jsonpickle.decode(response.content)
+
+        user_details['password'] = 'password456'
+
+        url = 'https://54.191.104.28:5000/hecate/api/v1.0/updateUser'
+        headers = {
+            'Authorization': 'Bearer {}'.format(access_token),
+            'Content-Type': 'application/json'
+        }
+        response = requests.post(url, headers = headers,data = json.dumps(user_details), verify=False)
+
+        print "code:"+ str(response.status_code)
+        print "******************"
+        print "headers:"+ str(response.headers)
+        print "******************"
+        print "content:"+ str(response.text)
+    except Exception, e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
+
 if __name__ == "__main__":
     if sys.argv[1] == "route":
         consumeGETRequestSync()
 
     if sys.argv[1] == "create_user":
         create_User()
+
+    if sys.argv[1] == "get_user":
+        get_User()
+
+    if sys.argv[1] == "update_user":
+        update_User()

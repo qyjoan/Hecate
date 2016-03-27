@@ -1,6 +1,8 @@
 #!/usr/bin/python2.7
 from flask import Flask, jsonify, request
 from flask.ext.sentinel import ResourceOwnerPasswordCredentials, oauth
+from flask import make_response, request, current_app
+from functools import update_wrapper
 
 import json
 import sys
@@ -11,6 +13,47 @@ from c_User import *
 import urlparse
 import jsonpickle
 import os
+
+def crossdomain(origin=None, methods=None, headers=None,
+                max_age=21600, attach_to_all=True,
+                automatic_options=True):
+    if methods is not None:
+        methods = ', '.join(sorted(x.upper() for x in methods))
+    if headers is not None and not isinstance(headers, basestring):
+        headers = ', '.join(x.upper() for x in headers)
+    if not isinstance(origin, basestring):
+        origin = ', '.join(origin)
+    if isinstance(max_age, timedelta):
+        max_age = max_age.total_seconds()
+
+    def get_methods():
+        if methods is not None:
+            return methods
+
+        options_resp = current_app.make_default_options_response()
+        return options_resp.headers['allow']
+
+    def decorator(f):
+        def wrapped_function(*args, **kwargs):
+            if automatic_options and request.method == 'OPTIONS':
+                resp = current_app.make_default_options_response()
+            else:
+                resp = make_response(f(*args, **kwargs))
+            if not attach_to_all and request.method != 'OPTIONS':
+                return resp
+
+            h = resp.headers
+
+            h['Access-Control-Allow-Origin'] = origin
+            h['Access-Control-Allow-Methods'] = get_methods()
+            h['Access-Control-Max-Age'] = str(max_age)
+            if headers is not None:
+                h['Access-Control-Allow-Headers'] = headers
+            return resp
+
+        f.provide_automatic_options = False
+        return update_wrapper(wrapped_function, f)
+    return decorator
 
 def initialise_days(days):
 
@@ -39,16 +82,17 @@ def initialise_days(days):
 app = Flask(__name__)
 
 @app.route('/hecate/api/v1.0/getUser', methods=['GET'])
-@oauth.require_oauth()
+@crossdomain(origin='*')
+#@oauth.require_oauth()
 def get_user():
     try:
         user_Object = User()
 
+        username = request.args.get('username')
+
         # Ensure the username hasn't come through with quotes at the beginning and end
-        if request.data.startswith('"') and request.data.endswith('"'):
-            username = request.data[1:-1]
-        else:
-            username = request.data
+        if username.startswith('"') and username.endswith('"'):
+            username = username[1:-1]
 
         # Initialise the user object
         response = user_Object.Initialise(username)
@@ -62,6 +106,7 @@ def get_user():
         print(exc_type, fname, exc_tb.tb_lineno)
 
 @app.route('/hecate/api/v1.0/updateUser', methods=['POST'])
+@crossdomain(origin='*')
 @oauth.require_oauth()
 def update_user_route():
     try:
@@ -86,7 +131,8 @@ def update_user_route():
         print(exc_type, fname, exc_tb.tb_lineno, e)
 
 @app.route('/hecate/api/v1.0/create_user', methods=['POST'])
-@oauth.require_oauth()
+@crossdomain(origin='*')
+#@oauth.require_oauth()
 def create_user():
     data = {}
     try:
@@ -101,7 +147,8 @@ def create_user():
     return response
 
 @app.route('/hecate/api/v1.0/route', methods=['POST'])
-@oauth.require_oauth()
+@crossdomain(origin='*')
+#@oauth.require_oauth()
 def get_route():
     data = {}
     data = ast.literal_eval(request.data)
@@ -133,5 +180,6 @@ def index():
     return "Hello, World!"
 
 if __name__ == '__main__':
-    ResourceOwnerPasswordCredentials(app)
-    app.run(ssl_context='adhoc', host='0.0.0.0')
+ #   ResourceOwnerPasswordCredentials(app)
+ #   app.run(ssl_context='adhoc', host='0.0.0.0')
+    app.run(host='0.0.0.0')
