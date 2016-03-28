@@ -122,9 +122,39 @@ def update_user_route():
         response = user_Object.update_Entire_User(json.dumps(data))
 
         if response > 0:
-            return "User successfully updated."
+            return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
         else:
-            return "ERROR: User Not Updated"
+            return json.dumps({'success':False}), 200, {'ContentType':'application/json'}
+
+    except Exception, e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno, e)
+
+@app.route('/hecate/api/v1.0/updateRoute', methods=['POST'])
+@crossdomain(origin='*')
+def update_route():
+    try:
+        data = {}
+        data = request.json
+        print data
+        username = request.form['username']
+        route = ast.literal_eval(request.form['route'])
+
+        print username
+        print route
+        user_Object = User()
+
+        # Initialise the user object
+        user_Object.Initialise(username)
+
+        response = user_Object.update_Mongo('route', route)
+
+        if response > 0:
+            return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+        else:
+            return json.dumps({'success':False}), 200, {'ContentType':'application/json'}
+
     except Exception, e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]

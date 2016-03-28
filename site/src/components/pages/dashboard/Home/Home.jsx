@@ -337,8 +337,8 @@ var Home = React.createClass({
                             </div>
                         </div>
                         <div className="row home-row">
-                            <div className="col-lg-12 col-md-12">
-                                <div className="maps" id="maps"></div>
+                            <div className="col-lg-10 col-md-10">
+                                <div className="maps" id="maps" align="center"></div>
                             </div>
                         </div>
                     </div>

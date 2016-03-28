@@ -63,8 +63,6 @@ class User():
                     d['day'] = day
                     d['earliest_start'] = user['route']['times']['outbound'][day]['earliest_start']
                     d['latest_start'] = user['route']['times']['outbound'][day]['latest_start']
-                    d['earliest_arrive'] = user['route']['times']['outbound'][day]['earliest_arrive']
-                    d['latest_arrive'] = user['route']['times']['outbound'][day]['latest_arrive']
                     d['current_start'] = user['route']['times']['outbound'][day]['current_start']
                     d['current_duration'] = user['route']['times']['outbound'][day]['current_duration']
                     outbound_times[day] = d
@@ -281,8 +279,6 @@ class User():
             d = {}
             d['earliest_start'] = self.outbound[day]['earliest_start']
             d['latest_start'] = self.outbound[day]['latest_start']
-            d['earliest_arrive'] = self.outbound[day]['earliest_arrive']
-            d['latest_arrive'] = self.outbound[day]['latest_arrive']
             d['current_start'] = self.outbound[day]['current_start']
             d['current_duration'] = self.outbound[day]['current_duration']
             output['route']['times']['outbound'][day] = d

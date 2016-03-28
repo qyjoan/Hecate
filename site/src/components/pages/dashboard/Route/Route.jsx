@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from "react-router";
 import {Panel, Input, ButtonInput, Row, Col} from 'react-bootstrap';
+var ReactDOM = require('react-dom');
 var ReactTabs = require('react-tabs');
 var Tab = ReactTabs.Tab;
 var Tabs = ReactTabs.Tabs;
@@ -8,8 +9,27 @@ var TabList = ReactTabs.TabList;
 var TabPanel = ReactTabs.TabPanel;
 
 var Route = React.createClass({
-        handleSelect: function (index, last) {
-            console.log('Selected tab: ' + index + ', Last tab: ' + last);
+        storeDays: function () {
+            var route = this.state.user['route']
+            var days = ""
+            var first = true;
+            if (route == undefined) {
+                route = {};
+            }
+            else {
+                route['days'].forEach(function (s) {
+                    if (first == true) {
+                        days = s
+                        first = false
+                    }
+                    else {
+                        days = days + ', ' + s
+                    }
+                })
+                this.setState({
+                  route_days: days
+                })
+            }
         },
 
         loadUserFromServer: function () {
@@ -32,14 +52,14 @@ var Route = React.createClass({
         }, // load from server end
 
         handleSubmitSuccess: function (data) {
-            console.log('Submit Success')
-            console.log(data)
             var user_data = JSON.parse(data);
 
             // TODO: SET ALL THE USER PARAMETERS HERE
             this.setState({
                 user: user_data,
             })
+            this.storeDays()
+
         },
 
         handleSubmitFailure: function (xhr, ajaxOptions, thrownError) {
@@ -71,10 +91,196 @@ var Route = React.createClass({
         },
 
         componentWillLeave: function () {
-            AppStore.removeChangeListener(this._onChange);
+            AppStore.removeCha
+            ngeListener(this._onChange);
+        },
+
+        handleChange: function (e) {
+            console.log(e)
+            var options = e.target.options;
+            var value = [];
+            for (var i = 0, l = options.length; i < l; i++) {
+                if (options[i].selected) {
+                    value.push(options[i].value);
+                }
+            }
+            this.setState({route_days: value})
+            //this.props.someCallback(value);
+        },
+
+        handleFormSubmit: function (event) {
+            event.preventDefault();
+            document.getElementById('heading').scrollIntoView();
+            this.setState({type: 'info', message: 'Sending...'}, this.sendFormData);
+        },
+
+        sendFormData: function () {
+
+            // Fetch form values.
+            var formatted_start = {formatted_address: ReactDOM.findDOMNode(this.refs.home.getInputDOMNode()).value}
+            var formatted_end = {formatted_address: ReactDOM.findDOMNode(this.refs.work.getInputDOMNode()).value}
+            var address = {
+                start_location: formatted_start,
+                end_location: formatted_end
+            };
+            var transportation = ReactDOM.findDOMNode(this.refs.mode.getInputDOMNode()).value
+
+            var monday_outbound = {
+                earliest_start: ReactDOM.findDOMNode(this.refs.monday_outbound_earliest.getInputDOMNode()).value,
+                current_start: ReactDOM.findDOMNode(this.refs.monday_outbound_current.getInputDOMNode()).value,
+                current_duration: ReactDOM.findDOMNode(this.refs.monday_outbound_duration.getInputDOMNode()).value,
+                latest_start: ReactDOM.findDOMNode(this.refs.monday_outbound_latest.getInputDOMNode()).value
+            };
+
+            var monday_homebound = {
+                earliest_start: ReactDOM.findDOMNode(this.refs.monday_homebound_earliest.getInputDOMNode()).value,
+                current_start: ReactDOM.findDOMNode(this.refs.monday_homebound_current.getInputDOMNode()).value,
+                current_duration: ReactDOM.findDOMNode(this.refs.monday_homebound_duration.getInputDOMNode()).value,
+                latest_start: ReactDOM.findDOMNode(this.refs.monday_homebound_latest.getInputDOMNode()).value
+            }
+
+            var tuesday_outbound = {
+                earliest_start: ReactDOM.findDOMNode(this.refs.tuesday_outbound_earliest.getInputDOMNode()).value,
+                current_start: ReactDOM.findDOMNode(this.refs.tuesday_outbound_current.getInputDOMNode()).value,
+                current_duration: ReactDOM.findDOMNode(this.refs.tuesday_outbound_duration.getInputDOMNode()).value,
+                latest_start: ReactDOM.findDOMNode(this.refs.tuesday_outbound_latest.getInputDOMNode()).value
+            };
+
+            var tuesday_homebound = {
+                earliest_start: ReactDOM.findDOMNode(this.refs.tuesday_homebound_earliest.getInputDOMNode()).value,
+                current_start: ReactDOM.findDOMNode(this.refs.tuesday_homebound_current.getInputDOMNode()).value,
+                current_duration: ReactDOM.findDOMNode(this.refs.tuesday_homebound_duration.getInputDOMNode()).value,
+                latest_start: ReactDOM.findDOMNode(this.refs.tuesday_homebound_latest.getInputDOMNode()).value
+            }
+
+            var wednesday_outbound = {
+                earliest_start: ReactDOM.findDOMNode(this.refs.wednesday_outbound_earliest.getInputDOMNode()).value,
+                current_start: ReactDOM.findDOMNode(this.refs.wednesday_outbound_current.getInputDOMNode()).value,
+                current_duration: ReactDOM.findDOMNode(this.refs.wednesday_outbound_duration.getInputDOMNode()).value,
+                latest_start: ReactDOM.findDOMNode(this.refs.wednesday_outbound_latest.getInputDOMNode()).value
+            };
+
+            var wednesday_homebound = {
+                earliest_start: ReactDOM.findDOMNode(this.refs.wednesday_homebound_earliest.getInputDOMNode()).value,
+                current_start: ReactDOM.findDOMNode(this.refs.wednesday_homebound_current.getInputDOMNode()).value,
+                current_duration: ReactDOM.findDOMNode(this.refs.wednesday_homebound_duration.getInputDOMNode()).value,
+                latest_start: ReactDOM.findDOMNode(this.refs.wednesday_homebound_latest.getInputDOMNode()).value
+            }
+
+            var thursday_outbound = {
+                earliest_start: ReactDOM.findDOMNode(this.refs.thursday_outbound_earliest.getInputDOMNode()).value,
+                current_start: ReactDOM.findDOMNode(this.refs.thursday_outbound_current.getInputDOMNode()).value,
+                current_duration: ReactDOM.findDOMNode(this.refs.thursday_outbound_duration.getInputDOMNode()).value,
+                latest_start: ReactDOM.findDOMNode(this.refs.thursday_outbound_latest.getInputDOMNode()).value
+            };
+
+            var thursday_homebound = {
+                earliest_start: ReactDOM.findDOMNode(this.refs.thursday_homebound_earliest.getInputDOMNode()).value,
+                current_start: ReactDOM.findDOMNode(this.refs.thursday_homebound_current.getInputDOMNode()).value,
+                current_duration: ReactDOM.findDOMNode(this.refs.thursday_homebound_duration.getInputDOMNode()).value,
+                latest_start: ReactDOM.findDOMNode(this.refs.thursday_homebound_latest.getInputDOMNode()).value
+            }
+
+            var friday_outbound = {
+                earliest_start: ReactDOM.findDOMNode(this.refs.friday_outbound_earliest.getInputDOMNode()).value,
+                current_start: ReactDOM.findDOMNode(this.refs.friday_outbound_current.getInputDOMNode()).value,
+                current_duration: ReactDOM.findDOMNode(this.refs.friday_outbound_duration.getInputDOMNode()).value,
+                latest_start: ReactDOM.findDOMNode(this.refs.friday_outbound_latest.getInputDOMNode()).value
+            };
+
+            var friday_homebound = {
+                earliest_start: ReactDOM.findDOMNode(this.refs.friday_homebound_earliest.getInputDOMNode()).value,
+                current_start: ReactDOM.findDOMNode(this.refs.friday_homebound_current.getInputDOMNode()).value,
+                current_duration: ReactDOM.findDOMNode(this.refs.friday_homebound_duration.getInputDOMNode()).value,
+                latest_start: ReactDOM.findDOMNode(this.refs.friday_homebound_latest.getInputDOMNode()).value
+            }
+
+            var saturday_outbound = {
+                earliest_start: ReactDOM.findDOMNode(this.refs.saturday_outbound_earliest.getInputDOMNode()).value,
+                current_start: ReactDOM.findDOMNode(this.refs.saturday_outbound_current.getInputDOMNode()).value,
+                current_duration: ReactDOM.findDOMNode(this.refs.saturday_outbound_duration.getInputDOMNode()).value,
+                latest_start: ReactDOM.findDOMNode(this.refs.saturday_outbound_latest.getInputDOMNode()).value
+            };
+
+            var saturday_homebound = {
+                earliest_start: ReactDOM.findDOMNode(this.refs.saturday_homebound_earliest.getInputDOMNode()).value,
+                current_start: ReactDOM.findDOMNode(this.refs.saturday_homebound_current.getInputDOMNode()).value,
+                current_duration: ReactDOM.findDOMNode(this.refs.saturday_homebound_duration.getInputDOMNode()).value,
+                latest_start: ReactDOM.findDOMNode(this.refs.saturday_homebound_latest.getInputDOMNode()).value
+            }
+
+            var sunday_outbound = {
+                earliest_start: ReactDOM.findDOMNode(this.refs.sunday_outbound_earliest.getInputDOMNode()).value,
+                current_start: ReactDOM.findDOMNode(this.refs.sunday_outbound_current.getInputDOMNode()).value,
+                current_duration: ReactDOM.findDOMNode(this.refs.sunday_outbound_duration.getInputDOMNode()).value,
+                latest_start: ReactDOM.findDOMNode(this.refs.sunday_outbound_latest.getInputDOMNode()).value
+            };
+
+            var sunday_homebound = {
+                earliest_start: ReactDOM.findDOMNode(this.refs.sunday_homebound_earliest.getInputDOMNode()).value,
+                current_start: ReactDOM.findDOMNode(this.refs.sunday_homebound_current.getInputDOMNode()).value,
+                current_duration: ReactDOM.findDOMNode(this.refs.sunday_homebound_duration.getInputDOMNode()).value,
+                latest_start: ReactDOM.findDOMNode(this.refs.sunday_homebound_latest.getInputDOMNode()).value
+            }
+
+            var times = {
+                outbound: {
+                    Monday: monday_outbound,
+                    Tuesday: tuesday_outbound,
+                    Wednesday: wednesday_outbound,
+                    Thursday: thursday_outbound,
+                    Friday: friday_outbound,
+                    Saturday: saturday_outbound,
+                    Sunday: sunday_outbound,
+                },
+                homebound: {
+                    Monday: monday_homebound,
+                    Tuesday: tuesday_homebound,
+                    Wednesday: wednesday_homebound,
+                    Thursday: thursday_homebound,
+                    Friday: friday_homebound,
+                    Saturday: saturday_homebound,
+                    Sunday: sunday_homebound,
+                }
+            }
+
+            var route = {
+                address: address,
+                days: this.state.route_days.split(","),
+                transportation: transportation,
+                times: times
+            };
+
+            var http = require("http");
+            var url = "http://54.191.104.28:5000/hecate/api/v1.0/updateRoute";
+            var post_data = {username: this.state.user['username'], route: JSON.stringify(route)}
+            console.log(post_data)
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                dataType: 'json',
+                data: post_data,
+                success: this.handleFormSuccess,
+                error: this.handleFormFailure,
+            });
+        },
+
+        handleFormSuccess: function(){
+            this.setState({type: 'info', message: 'Route Successfully Updated...'});
+        },
+
+        handleFormFailure: function(){
+            this.setState({type: 'error', message: 'Route Error...'});
         },
 
         render: function () {
+            if (this.state.type && this.state.message) {
+                var classString = 'alert alert-' + this.state.type;
+                var status = <div id="status" className={classString} ref="status">
+                    {this.state.message}
+                </div>;
+            }
             var route = this.state.user['route']
             if (route == undefined) {
                 route = {};
@@ -110,6 +316,7 @@ var Route = React.createClass({
                         days = days + ', ' + s
                     }
                 });
+
                 if (days.indexOf('Monday') != -1) {
                     var monday = "selected"
                     var monday_outbound_current = route['times']['outbound']['Monday']['current_start']
@@ -190,15 +397,16 @@ var Route = React.createClass({
             }
             return (
                 <div>
-                    <pageheader pagename="Form" subtitle="Edit Route"></pageheader>
-
+                    <pageheader id="heading" pagename="Form" subtitle="Edit Route"></pageheader>
                     <div className="conter-wrapper" ng-animate=" 'animate' ">
                         <div className="row">
                             <div className="col-md-12">
                                 <Panel header={<span>Edit Route</span>}
                                        bsStyle="info"
                                     >
-                                    <form className="form-horizontal">
+                                    {status}
+
+                                    <form className="form-horizontal" onSubmit={this.handleFormSubmit}>
                                         <Input ref="home" type="text" label="Where are leaving from?" value={start}/>
                                         <Input ref="work" type="text" label="Where are going?"
                                                value={end}/>
@@ -211,7 +419,8 @@ var Route = React.createClass({
                                         </Input>
                                         <Input ref="days" type="select"
                                                label="What days of the week? (shift/control click to select all that apply)"
-                                               multiple>
+                                               multiple
+                                               onChange={this.handleChange}>
                                             <option value="Monday" selected={monday}>Monday</option>
                                             <option value="Tuesday" selected={tuesday}>Tuesday</option>
                                             <option value="Wednesday" selected={wednesday}>Wednesday</option>
@@ -221,238 +430,208 @@ var Route = React.createClass({
                                             <option value="Sunday" selected={sunday}>Sunday</option>
                                         </Input>
 
-                                        <Tabs onSelect={this.handleSelect}>
-
-                                            <TabList>
-                                                <Tab>Monday</Tab>
-                                                <Tab>Tuesday</Tab>
-                                                <Tab>Wednesday</Tab>
-                                                <Tab>Thursday</Tab>
-                                                <Tab>Friday</Tab>
-                                                <Tab>Saturday</Tab>
-                                                <Tab>Sunday</Tab>
-                                            </TabList>
-                                            <TabPanel>
                                                 <b>When travelling from {start} to {end}:</b><br/><br/>
-                                                <Input ref="monday_leave_time" type="text"
+                                                <b>Monday</b><br/>
+                                                <Input ref="monday_outbound_current" type="text"
                                                        label="What time do you plan on leaving?"
                                                        value={monday_outbound_current}/>
-                                                <Input ref="monday_leave_duration" type="text"
+                                                <Input ref="monday_outbound_duration" type="text"
                                                        label="How many minutes do you expect it to take?"
                                                        value={monday_outbound_duration}/>
-                                                <Input ref="monday_leave_early" type="text"
+                                                <Input ref="monday_outbound_earliest" type="text"
                                                        label="When is the earliest you would consider leaving?"
                                                        value={monday_outbound_earliest}/>
-                                                <Input ref="monday_leave_late" type="text"
+                                                <Input ref="monday_outbound_latest" type="text"
                                                        label="When is the latest you would consider leaving?"
                                                        value={monday_outbound_latest}/>
 
-                                                <br/><br/><b>When travelling from {end} to {start}:</b><br /><br />
-
-                                                <Input ref="monday_return_time" type="text"
-                                                       label="What time do you plan on coming back?"
-                                                       value={monday_homebound_current}/>
-                                                <Input ref="monday_return_duration" type="text"
-                                                       label="How many minutes do you expect it to take?"
-                                                       value={monday_homebound_duration}/>
-                                                <Input ref="monday_return_early" type="text"
-                                                       label="When is the earliest you would consider leaving?"
-                                                       value={monday_homebound_earliest}/>
-                                                <Input ref="monday_return_late" type="text"
-                                                       label="When is the latest you would consider leaving?"
-                                                       value={monday_homebound_latest}/>
-                                            </TabPanel>
-
-                                            <TabPanel>
-                                                <b>When travelling from {start} to {end}:</b><br/><br/>
-                                                <Input ref="tuesday_leave_time" type="text"
+                                                <b>Tuesday</b><br/>
+                                                <Input ref="tuesday_outbound_current" type="text"
                                                        label="What time do you plan on leaving?"
                                                        value={tuesday_outbound_current}/>
-                                                <Input ref="tuesday_leave_duration" type="text"
+                                                <Input ref="tuesday_outbound_duration" type="text"
                                                        label="How many minutes do you expect it to take?"
                                                        value={tuesday_outbound_duration}/>
-                                                <Input ref="tuesday_leave_early" type="text"
+                                                <Input ref="tuesday_outbound_earliest" type="text"
                                                        label="When is the earliest you would consider leaving?"
                                                        value={tuesday_outbound_earliest}/>
-                                                <Input ref="tuesday_leave_late" type="text"
+                                                <Input ref="tuesday_outbound_latest" type="text"
                                                        label="When is the latest you would consider leaving?"
                                                        value={tuesday_outbound_latest}/>
 
-                                                <br/><br/><b>When travelling from {end} to {start}:</b><br /><br />
-
-                                                <Input ref="tuesday_return_time" type="text"
-                                                       label="What time do you plan on coming back?"
-                                                       value={tuesday_homebound_current}/>
-                                                <Input ref="tuesday_return_duration" type="text"
-                                                       label="How many minutes do you expect it to take?"
-                                                       value={tuesday_homebound_duration}/>
-                                                <Input ref="tuesday_return_early" type="text"
-                                                       label="When is the earliest you would consider leaving?"
-                                                       value={tuesday_homebound_earliest}/>
-                                                <Input ref="tuesday_return_late" type="text"
-                                                       label="When is the latest you would consider leaving?"
-                                                       value={tuesday_homebound_latest}/>
-                                            </TabPanel>
-
-                                            <TabPanel>
-                                                <b>When travelling from {start} to {end}:</b><br/><br/>
-                                                <Input ref="wednesday_leave_time" type="text"
+                                                <b>Wednesday</b><br/>
+                                                <Input ref="wednesday_outbound_current" type="text"
                                                        label="What time do you plan on leaving?"
                                                        value={wednesday_outbound_current}/>
-                                                <Input ref="wednesday_leave_duration" type="text"
+                                                <Input ref="wednesday_outbound_duration" type="text"
                                                        label="How many minutes do you expect it to take?"
                                                        value={wednesday_outbound_duration}/>
-                                                <Input ref="wednesday_leave_early" type="text"
+                                                <Input ref="wednesday_outbound_earliest" type="text"
                                                        label="When is the earliest you would consider leaving?"
                                                        value={wednesday_outbound_earliest}/>
-                                                <Input ref="wednesday_leave_late" type="text"
+                                                <Input ref="wednesday_outbound_latest" type="text"
                                                        label="When is the latest you would consider leaving?"
                                                        value={wednesday_outbound_latest}/>
 
-                                                <br/><br/><b>When travelling from {end} to {start}:</b><br /><br />
-
-                                                <Input ref="wednesday_return_time" type="text"
-                                                       label="What time do you plan on coming back?"
-                                                       value={wednesday_homebound_current}/>
-                                                <Input ref="wednesday_return_duration" type="text"
-                                                       label="How many minutes do you expect it to take?"
-                                                       value={wednesday_homebound_duration}/>
-                                                <Input ref="wednesday_return_early" type="text"
-                                                       label="When is the earliest you would consider leaving?"
-                                                       value={wednesday_homebound_earliest}/>
-                                                <Input ref="wednesday_return_late" type="text"
-                                                       label="When is the latest you would consider leaving?"
-                                                       value={wednesday_homebound_latest}/>
-                                            </TabPanel>
-
-                                            <TabPanel>
-                                                <b>When travelling from {start} to {end}:</b><br/><br/>
-                                                <Input ref="thursday_leave_time" type="text"
+                                                <b>Thursday</b><br/>
+                                                <Input ref="thursday_outbound_current" type="text"
                                                        label="What time do you plan on leaving?"
                                                        value={thursday_outbound_current}/>
-                                                <Input ref="thursday_leave_duration" type="text"
+                                                <Input ref="thursday_outbound_duration" type="text"
                                                        label="How many minutes do you expect it to take?"
                                                        value={thursday_outbound_duration}/>
-                                                <Input ref="thursday_leave_early" type="text"
+                                                <Input ref="thursday_outbound_earliest" type="text"
                                                        label="When is the earliest you would consider leaving?"
                                                        value={thursday_outbound_earliest}/>
-                                                <Input ref="thursday_leave_late" type="text"
+                                                <Input ref="thursday_outbound_latest" type="text"
                                                        label="When is the latest you would consider leaving?"
                                                        value={thursday_outbound_latest}/>
 
-                                                <br/><br/><b>When travelling from {end} to {start}:</b><br /><br />
-
-                                                <Input ref="thursday_return_time" type="text"
-                                                       label="What time do you plan on coming back?"
-                                                       value={thursday_homebound_current}/>
-                                                <Input ref="thursday_return_duration" type="text"
-                                                       label="How many minutes do you expect it to take?"
-                                                       value={thursday_homebound_duration}/>
-                                                <Input ref="thursday_return_early" type="text"
-                                                       label="When is the earliest you would consider leaving?"
-                                                       value={thursday_homebound_earliest}/>
-                                                <Input ref="thursday_return_late" type="text"
-                                                       label="When is the latest you would consider leaving?"
-                                                       value={thursday_homebound_latest}/>
-                                            </TabPanel>
-
-                                            <TabPanel>
-                                                <b>When travelling from {start} to {end}:</b><br/><br/>
-                                                <Input ref="friday_leave_time" type="text"
+                                                <b>Friday</b><br/>
+                                                <Input ref="friday_outbound_current" type="text"
                                                        label="What time do you plan on leaving?"
                                                        value={friday_outbound_current}/>
-                                                <Input ref="friday_leave_duration" type="text"
+                                                <Input ref="friday_outbound_duration" type="text"
                                                        label="How many minutes do you expect it to take?"
                                                        value={friday_outbound_duration}/>
-                                                <Input ref="friday_leave_early" type="text"
+                                                <Input ref="friday_outbound_earliest" type="text"
                                                        label="When is the earliest you would consider leaving?"
                                                        value={friday_outbound_earliest}/>
-                                                <Input ref="friday_leave_late" type="text"
+                                                <Input ref="friday_outbound_latest" type="text"
                                                        label="When is the latest you would consider leaving?"
                                                        value={friday_outbound_latest}/>
 
-                                                <br/><br/><b>When travelling from {end} to {start}:</b><br /><br />
-
-                                                <Input ref="friday_return_time" type="text"
-                                                       label="What time do you plan on coming back?"
-                                                       value={friday_homebound_current}/>
-                                                <Input ref="friday_return_duration" type="text"
-                                                       label="How many minutes do you expect it to take?"
-                                                       value={friday_homebound_duration}/>
-                                                <Input ref="friday_return_early" type="text"
-                                                       label="When is the earliest you would consider leaving?"
-                                                       value={friday_homebound_earliest}/>
-                                                <Input ref="friday_return_late" type="text"
-                                                       label="When is the latest you would consider leaving?"
-                                                       value={friday_homebound_latest}/>
-                                            </TabPanel>
-
-                                            <TabPanel>
-                                                <b>When travelling from {start} to {end}:</b><br/><br/>
-                                                <Input ref="saturday_leave_time" type="text"
+                                                <b>Saturday</b><br/>
+                                                <Input ref="saturday_outbound_current" type="text"
                                                        label="What time do you plan on leaving?"
                                                        value={saturday_outbound_current}/>
-                                                <Input ref="saturday_leave_duration" type="text"
+                                                <Input ref="saturday_outbound_duration" type="text"
                                                        label="How many minutes do you expect it to take?"
                                                        value={saturday_outbound_duration}/>
-                                                <Input ref="saturday_leave_early" type="text"
+                                                <Input ref="saturday_outbound_earliest" type="text"
                                                        label="When is the earliest you would consider leaving?"
                                                        value={saturday_outbound_earliest}/>
-                                                <Input ref="saturday_leave_late" type="text"
+                                                <Input ref="saturday_outbound_latest" type="text"
                                                        label="When is the latest you would consider leaving?"
                                                        value={saturday_outbound_latest}/>
 
-                                                <br/><br/><b>When travelling from {end} to {start}:</b><br /><br />
+                                                <b>Sunday</b><br/>
+                                                <Input ref="sunday_homebound_current" type="text"
+                                                       label="What time do you plan on coming back?"
+                                                       value={sunday_homebound_current}/>
+                                                <Input ref="sunday_homebound_duration" type="text"
+                                                       label="How many minutes do you expect it to take?"
+                                                       value={sunday_homebound_duration}/>
+                                                <Input ref="sunday_homebound_earliest" type="text"
+                                                       label="When is the earliest you would consider leaving?"
+                                                       value={sunday_homebound_earliest}/>
+                                                <Input ref="sunday_homebound_latest" type="text"
+                                                       label="When is the latest you would consider leaving?"
+                                                       value={sunday_homebound_latest}/>
 
-                                                <Input ref="saturday_return_time" type="text"
+                                                <br/><br/><b>When travelling from {end} to {start}:</b><br /><br />
+                                                <b>Monday</b><br/>
+
+                                                <Input ref="monday_homebound_current" type="text"
+                                                       label="What time do you plan on coming back?"
+                                                       value={monday_homebound_current}/>
+                                                <Input ref="monday_homebound_duration" type="text"
+                                                       label="How many minutes do you expect it to take?"
+                                                       value={monday_homebound_duration}/>
+                                                <Input ref="monday_homebound_earliest" type="text"
+                                                       label="When is the earliest you would consider leaving?"
+                                                       value={monday_homebound_earliest}/>
+                                                <Input ref="monday_homebound_latest" type="text"
+                                                       label="When is the latest you would consider leaving?"
+                                                       value={monday_homebound_latest}/>
+
+                                                <b>Tuesday</b><br/>
+                                                <Input ref="tuesday_homebound_current" type="text"
+                                                       label="What time do you plan on coming back?"
+                                                       value={tuesday_homebound_current}/>
+                                                <Input ref="tuesday_homebound_duration" type="text"
+                                                       label="How many minutes do you expect it to take?"
+                                                       value={tuesday_homebound_duration}/>
+                                                <Input ref="tuesday_homebound_earliest" type="text"
+                                                       label="When is the earliest you would consider leaving?"
+                                                       value={tuesday_homebound_earliest}/>
+                                                <Input ref="tuesday_homebound_latest" type="text"
+                                                       label="When is the latest you would consider leaving?"
+                                                       value={tuesday_homebound_latest}/>
+
+                                                <b>Wednesday</b><br/>
+                                                <Input ref="wednesday_homebound_current" type="text"
+                                                       label="What time do you plan on coming back?"
+                                                       value={wednesday_homebound_current}/>
+                                                <Input ref="wednesday_homebound_duration" type="text"
+                                                       label="How many minutes do you expect it to take?"
+                                                       value={wednesday_homebound_duration}/>
+                                                <Input ref="wednesday_homebound_earliest" type="text"
+                                                       label="When is the earliest you would consider leaving?"
+                                                       value={wednesday_homebound_earliest}/>
+                                                <Input ref="wednesday_homebound_latest" type="text"
+                                                       label="When is the latest you would consider leaving?"
+                                                       value={wednesday_homebound_latest}/>
+
+                                                <b>Thursday</b><br/>
+                                                <Input ref="thursday_homebound_current" type="text"
+                                                       label="What time do you plan on coming back?"
+                                                       value={thursday_homebound_current}/>
+                                                <Input ref="thursday_homebound_duration" type="text"
+                                                       label="How many minutes do you expect it to take?"
+                                                       value={thursday_homebound_duration}/>
+                                                <Input ref="thursday_homebound_earliest" type="text"
+                                                       label="When is the earliest you would consider leaving?"
+                                                       value={thursday_homebound_earliest}/>
+                                                <Input ref="thursday_homebound_latest" type="text"
+                                                       label="When is the latest you would consider leaving?"
+                                                       value={thursday_homebound_latest}/>
+
+                                                <b>Friday</b><br/>
+                                                <Input ref="friday_homebound_current" type="text"
+                                                       label="What time do you plan on coming back?"
+                                                       value={friday_homebound_current}/>
+                                                <Input ref="friday_homebound_duration" type="text"
+                                                       label="How many minutes do you expect it to take?"
+                                                       value={friday_homebound_duration}/>
+                                                <Input ref="friday_homebound_earliest" type="text"
+                                                       label="When is the earliest you would consider leaving?"
+                                                       value={friday_homebound_earliest}/>
+                                                <Input ref="friday_homebound_latest" type="text"
+                                                       label="When is the latest you would consider leaving?"
+                                                       value={friday_homebound_latest}/>
+
+                                                <b>Saturday</b><br/>
+                                                <Input ref="saturday_homebound_current" type="text"
                                                        label="What time do you plan on coming back?"
                                                        value={saturday_homebound_current}/>
-                                                <Input ref="saturday_return_duration" type="text"
+                                                <Input ref="saturday_homebound_duration" type="text"
                                                        label="How many minutes do you expect it to take?"
                                                        value={saturday_homebound_duration}/>
-                                                <Input ref="saturday_return_early" type="text"
+                                                <Input ref="saturday_homebound_earliest" type="text"
                                                        label="When is the earliest you would consider leaving?"
                                                        value={saturday_homebound_earliest}/>
-                                                <Input ref="saturday_return_late" type="text"
+                                                <Input ref="saturday_homebound_latest" type="text"
                                                        label="When is the latest you would consider leaving?"
                                                        value={saturday_homebound_latest}/>
-                                            </TabPanel>
 
-                                            <TabPanel>
-                                                <b>When travelling from {start} to {end}:</b><br/><br/>
-                                                <Input ref="sunday_leave_time" type="text"
+                                                <b>Sunday</b><br/>
+                                                <Input ref="sunday_outbound_current" type="text"
                                                        label="What time do you plan on leaving?"
                                                        value={sunday_outbound_current}/>
-                                                <Input ref="sunday_leave_duration" type="text"
+                                                <Input ref="sunday_outbound_duration" type="text"
                                                        label="How many minutes do you expect it to take?"
                                                        value={sunday_outbound_duration}/>
-                                                <Input ref="sunday_leave_early" type="text"
+                                                <Input ref="sunday_outbound_earliest" type="text"
                                                        label="When is the earliest you would consider leaving?"
                                                        value={sunday_outbound_earliest}/>
-                                                <Input ref="sunday_leave_late" type="text"
+                                                <Input ref="sunday_outbound_latest" type="text"
                                                        label="When is the latest you would consider leaving?"
                                                        value={sunday_outbound_latest}/>
 
-                                                <br/><br/><b>When travelling from {end} to {start}:</b><br /><br />
-
-                                                <Input ref="sunday_return_time" type="text"
-                                                       label="What time do you plan on coming back?"
-                                                       value={sunday_homebound_current}/>
-                                                <Input ref="sunday_return_duration" type="text"
-                                                       label="How many minutes do you expect it to take?"
-                                                       value={sunday_homebound_duration}/>
-                                                <Input ref="sunday_return_early" type="text"
-                                                       label="When is the earliest you would consider leaving?"
-                                                       value={sunday_homebound_earliest}/>
-                                                <Input ref="sunday_return_late" type="text"
-                                                       label="When is the latest you would consider leaving?"
-                                                       value={sunday_homebound_latest}/>
-                                            </TabPanel>
-
-                                        </Tabs>
-                                        <ButtonInput
-                                            value="Submit"
-                                            wrapperClassName="col-xs-offset-5"/>
+                                        <ButtonInput type="submit"
+                                                     value="Submit"
+                                                     wrapperClassName="col-xs-offset-5"/>
                                     </form>
                                 </Panel>
                             </div>
@@ -469,12 +648,12 @@ var Route = React.createClass({
             );
         },
 
-  _onChange: function() {
+        _onChange: function () {
 
-      this.setState({
-          language: AppStore.getLanguage()
-      })
-  }
+            this.setState({
+                language: AppStore.getLanguage()
+            })
+        }
 
     })
     ;
