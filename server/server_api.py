@@ -58,18 +58,13 @@ def consumeGETRequestSync(payload):
         payload=json.dumps(params),
         method=urlfetch.POST,
         headers=headers,
-        validate_certificate=False
+        validate_certificate=False,
+        deadline=120
     )
 
     logging.info("=========================")
-    logging.info("=========================")
     logging.info("code:"+ str(response.status_code))
-    logging.info("=========================")
     logging.info("headers:"+ str(response.headers))
-    logging.info("=========================")
-    logging.info("content:"+ str(response.content))
-    logging.info("=========================")
-    logging.info("json:"+ json.loads(response.content))
-    logging.info("=========================")
+    logging.info("content:"+ str(response.text))
     logging.info("=========================")
     return response.content

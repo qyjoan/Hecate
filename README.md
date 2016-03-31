@@ -131,7 +131,7 @@ Recommendation for routes:
         	 }
      	},
 'homebound':
-	{'monday': {'new_recommendation':,
+	['monday': {'new_recommendation':,
          	    'current_departure':,
          	    'suggested_departure':,
          	    'current_duration':,
@@ -145,7 +145,7 @@ Recommendation for routes:
          	    'suggested_route_duration':,
          	    'time_saved':
          	   }
-     	}
+     	]
 }
 
 ````

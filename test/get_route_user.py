@@ -13,6 +13,7 @@ import time
 from dateutil import tz
 import time
 import sys
+sys.path.append('../')
 from c_Google import *
 from c_User import *
 import pyowm
@@ -131,58 +132,54 @@ if __name__ == '__main__':
     db = client.Hecate
     collection = db.User
 
-    # Continue Forever!
-    while (1):
-        current_time = datetime.now()
+    current_time = datetime.now()
 
-        # Obtain all users from the database that are due for an update
-        c = collection.find({'next_check_time': {"$lte": current_time} })
-        if c.count() == 0:
-            print "%s\tNo Records Found to Update ... Sleeping for 5 mins...." %datetime.now()
-            time.sleep(300)
-        else:
+    c = collection.find({'username': sys.argv[1] })
+    if c.count() == 0:
+        print "%s\tNo Records Found to Update ... Sleeping for 5 mins...." %datetime.now()
+        exit()
+    else:
+        while(1):
             print "%s\tFound %s records to process." %(datetime.now(), c.count())
 
-            # Loop through the users, calling the API to update route information and log to route DB
-            for item in c:
-                user = User()
-                user.Initialise(item["username"])
+            user = User(c[0]["username"])
+            user.Initialise()
 
-                # Initialise the days
-                travel_days = initialise_days(user.travel_days)
+            # Initialise the days
+            travel_days = initialise_days(user.travel_days)
 
-                # If the difference in current time and departure time is less than 5 mins, then get live traffic.
-                today = datetime.today().date()
-                today_weekday = calendar.day_name[datetime.today().weekday()]
+            # If the difference in current time and departure time is less than 5 mins, then get live traffic.
+            today = datetime.today().date()
+            today_weekday = calendar.day_name[datetime.today().weekday()]
 
-                # Loop through until we have the start day.
-                while (today_weekday not in user.homebound_time.keys()):
-                    today = today + timedelta(days = 1)
-                    today_weekday = calendar.day_name[today.weekday()]
+            # Loop through until we have the start day.
+            while (today_weekday not in user.homebound_time.keys()):
+                today = today + timedelta(days = 1)
+                today_weekday = calendar.day_name[today.weekday()]
 
-                try:
-                    current_start = datetime.strptime(str(today) + ' ' + user.outbound_time[today_weekday]['current_start'], '%Y-%m-%d %H:%M')
-                    current_home = datetime.strptime(str(today) + ' ' + user.homebound_time[today_weekday]['current_home'], '%Y-%m-%d %H:%M')
+            try:
+                current_start = datetime.strptime(str(today) + ' ' + user.outbound_time[today_weekday]['current_start'], '%Y-%m-%d %H:%M')
+                current_home = datetime.strptime(str(today) + ' ' + user.homebound_time[today_weekday]['current_home'], '%Y-%m-%d %H:%M')
 
-                    outbound_time_diff = (current_time - current_start).total_seconds()/60
-                    homebound_time_diff = (current_time - current_home).total_seconds()/60
+                outbound_time_diff = (current_time - current_start).total_seconds()/60
+                homebound_time_diff = (current_time - current_home).total_seconds()/60
 
-                    if outbound_time_diff >= 0 and outbound_time_diff <= 5:
-                         # Process Outbound Live Route
-                        Process_Route_Live('outbound', user)
-                    else:
-                        # Process Outbound - e.g. home to work
-                        Process_Route('outbound', user, travel_days)
+                if outbound_time_diff >= 0 and outbound_time_diff <= 5:
+                     # Process Outbound Live Route
+                    Process_Route_Live('outbound', user)
+                else:
+                    # Process Outbound - e.g. home to work
+                    Process_Route('outbound', user, travel_days)
 
-                    if homebound_time_diff >=0 and homebound_time_diff <= 5:
-                        # Process Outbound Live Route
-                        Process_Route_Live('homebound', user)
-                    else:
-                        # Process Homebound - e.g. work to home
-                        Process_Route('homebound', user, travel_days)
+                if homebound_time_diff >=0 and homebound_time_diff <= 5:
+                    # Process Outbound Live Route
+                    Process_Route_Live('homebound', user)
+                else:
+                    # Process Homebound - e.g. work to home
+                    Process_Route('homebound', user, travel_days)
 
-                except:
-                    print 'No Routes for user %s for day %s. Continuing...' %(user.username, today_weekday)
+            except:
+                print 'No Routes for user %s for day %s. Continuing...' %(user.username, today_weekday)
 
             # See how close departure time is and update next check time accordingly.
             update_Next_Check_Time()
