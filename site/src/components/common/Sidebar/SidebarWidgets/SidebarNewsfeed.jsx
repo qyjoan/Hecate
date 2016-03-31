@@ -3,50 +3,80 @@ import Router from 'react-router';
 import AppStore from '../../../../stores/AppStore';
 import Translate from '../../Translate';
 
-var SidebarNewsfeed = React.createClass({
+var SidebarRecommendationsfeed = React.createClass({
 
-  getInitialState: function(){
-    return {};
-  },
+    loadUserFromServer: function () {
+        console.log('Recommendations Newsfeed Loading...')
+        var self = this;
 
-  componentDidMount: function(){
-    AppStore.addChangeListener(this._onChange);
-  //   $.ajax({
-  //     url: "http://rest-service.guides.spring.io/greeting"
-  //   }).then(function(data) {
-  //       this.setState({
-  //           greetingId: data.id,
-  //           greetingContent: data.content
-  //       });
-  // })
-  },
+        // get walking directions from central park to the empire state building
+        var http = require("http");
+        var url = "http://54.191.104.28:5000/hecate/api/v1.0/recommendations";
+        var data = "user7"
 
-  componentWillLeave: function() {
-    AppStore.removeChangeListener(this._onChange);
-  },
+        $.ajax({
+            type: "GET",
+            url: url,
+            data: {username: data},
+            success: this.handleSubmitSuccess,
+            error: this.handleSubmitFailure,
+        });
 
-  render: function(){
-  
-    return ( <div className="news-feed">
-        <div className="feed-header">RECOMMENDATION HISTORY</div>
-        <div className="feed-content">
-          <ul className="feed">
-            <li>
-              <a href="">Updated Time - Monday. Possible time saving of 5 minutes!</a> <span className="feed-date">25/4/2015</span>
-            </li>
-            <li>
-              <a href="">Updated Time - Wednesday. Possible time saving of 15 minutes!</a> <span className="feed-date">25/4/2015</span>
-            </li>
-          </ul>
-        </div>
-      </div> 
-    );
-  },
+    }, // load from server end
 
-  _onChange: function(){
-    this.setState({language: AppStore.getLanguage()});
-  }
+    handleSubmitSuccess: function (data) {
+        console.log('Recommendations Submit Success')
+        var data = JSON.parse(data);
+
+        this.setState({
+            routes: data
+        })
+    },
+
+    handleSubmitFailure: function (xhr, ajaxOptions, thrownError) {
+        console.log('Error')
+    },
+
+    getInitialState: function () {
+        return {};
+    },
+
+    componentDidMount: function () {
+        this.loadUserFromServer();
+        AppStore.addChangeListener(this._onChange);
+        //   $.ajax({
+        //     url: "http://rest-service.guides.spring.io/greeting"
+        //   }).then(function(data) {
+        //       this.setState({
+        //           greetingId: data.id,
+        //           greetingContent: data.content
+        //       });
+        // })
+    },
+
+    componentWillLeave: function () {
+        AppStore.removeChangeListener(this._onChange);
+    },
+
+    render: function () {
+
+        var data = this.state.routes
+        console.log(data)
+
+        return ( <div className="news-feed">
+                <div className="feed-header">RECOMMENDATION HISTORY</div>
+                <div className="feed-content">
+                    <ul className="feed" dangerouslySetInnerHTML={{__html: data}}>
+                    </ul>
+                </div>
+            </div>
+        );
+    },
+
+    _onChange: function () {
+        this.setState({language: AppStore.getLanguage()});
+    }
 
 });
 
-export default SidebarNewsfeed;
+export default SidebarRecommendationsfeed;

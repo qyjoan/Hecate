@@ -207,6 +207,23 @@ def update_User():
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         print(exc_type, fname, exc_tb.tb_lineno)
 
+def get_Stats():
+    url = 'http://54.191.104.28:5000/hecate/api/v1.0/stats'
+
+    access_token = 'WAhEUONIBRTczHQRD9MyYCNUdf1Zr4'
+    headers = {
+        'Authorization': 'Bearer {}'.format(access_token),
+    }
+
+    # call get service with headers and params
+    response = requests.get(url, headers = headers,data = sys.argv[2], verify=False)
+
+    print "code:"+ str(response.status_code)
+    print "******************"
+    print "headers:"+ str(response.headers)
+    print "******************"
+    print "content:"+ str(response.text)
+
 if __name__ == "__main__":
     if sys.argv[1] == "route":
         consumeGETRequestSync()
@@ -219,3 +236,6 @@ if __name__ == "__main__":
 
     if sys.argv[1] == "update_user":
         update_User()
+
+    if sys.argv[1] == "get_stats":
+        get_Stats()

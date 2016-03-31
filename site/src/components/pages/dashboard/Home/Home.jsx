@@ -192,6 +192,19 @@ var Home = React.createClass({
                 error: this.handleSubmitFailure,
             });
 
+            // get walking directions from central park to the empire state building
+            var http = require("http");
+            var url = "http://54.191.104.28:5000/hecate/api/v1.0/stats";
+            var data = "user7"
+
+            $.ajax({
+                type: "GET",
+                url: url,
+                data: {username: data},
+                success: this.handleStatsSubmitSuccess,
+                error: this.handleStatsSubmitFailure,
+            });
+
         }, // load from server end
 
         handleSubmitSuccess: function (data) {
@@ -205,6 +218,31 @@ var Home = React.createClass({
             })
             this.loadMaps()
             console.log(user_data)
+        },
+
+        handleSubmitFailure: function (xhr, ajaxOptions, thrownError) {
+            console.log('Error')
+        },
+
+        handleStatsSubmitSuccess: function (data) {
+            console.log('Stats Submit Success')
+            console.log(data)
+            var user_data = JSON.parse(data);
+            if (user_data['today_outbound_time_saved'] > 0) {
+                var sub = 'Outbound (Save ' + user_data['today_outbound_time_saved'] + ' mins)'
+            }
+            else {
+                var sub = 'Outbound'
+            }
+
+            // TODO: SET ALL THE USER PARAMETERS HERE
+            this.setState({
+                total_saved: user_data['total_saved_minutes'] + ' Mins Saved',
+                since_date: 'Since: ' + new Date(Date.parse(user_data['since'])).toDateString(),
+                yearly_saved: user_data['yearly_projected'] + ' Hours',
+                today_outbound: user_data['today_outbound_departure'] + ' Departure',
+                today_outbound_sub: sub
+            })
         },
 
         handleSubmitFailure: function (xhr, ajaxOptions, thrownError) {
@@ -259,27 +297,27 @@ var Home = React.createClass({
                             <div className="col-md-4 col-lg-3">
                                 <div className="home-stats">
                                     <Stats icon="cloud-upload"
-                                           value="88%"
-                                           text="Time Savings"
+                                           value={this.state.total_saved}
+                                           text={this.state.since_date}
                                            bgclass="info"
                                            link="/dashboard/chartc3"
                                            progressValue="88"
                                         >
                                     </Stats>
                                     <Stats icon="heartbeat"
-                                           value="540 hours"
-                                           text="Saved Per Year"
+                                           value={this.state.yearly_saved}
+                                           text="Est. Saved Per Year"
                                            bgclass="success"
                                            link="/dashboard/chartc3"
-                                           progressValue="94"
+                                           progressValue="88"
                                         >
                                     </Stats>
                                     <Stats icon="flag"
-                                           value="12,351"
-                                           text="Routes Collected"
+                                           value={this.state.today_outbound}
+                                           text={this.state.today_outbound_sub}
                                            bgclass="danger"
-                                           link="/dashboard/inbox"
-                                           progressValue="72"
+                                           link="/dashboard/chartc3"
+                                           progressValue="88"
                                         >
                                     </Stats>
                                 </div>

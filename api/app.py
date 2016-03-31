@@ -205,6 +205,184 @@ def get_route():
 
     return jsonify(results=outbound_results)
 
+@app.route('/hecate/api/v1.0/stats', methods=['GET'])
+@crossdomain(origin='*')
+#@oauth.require_oauth()
+def get_stats():
+    try:
+        username = request.args.get('username')
+        print username
+
+        # Ensure the username hasn't come through with quotes at the beginning and end
+        if username.startswith('"') and username.endswith('"'):
+            username = username[1:-1]
+
+        # Connect to MongoDB
+        client = MongoClient()
+
+        db = client.Hecate
+        collection = db.Stats
+
+        # Obtain the user details from the DB
+        stats = collection.find({'username': username})
+
+        if stats <> None:
+            total_saved = {}
+            total_saved['outbound'] = {}
+            total_saved['homebound'] = {}
+            min_date = None
+            total_saved_minutes = 0
+            hours_per_year = 0 # Hours saved per week x 48 weeks.
+            total_days = 0
+
+            first_week = False
+            for stat in stats:
+                if min_date == None or stat['updated_at'] < min_date:
+                    min_date = stat['updated_at']
+
+                days = {}
+                ts_out = total_saved['outbound']
+                days = stat['outbound']
+                for day in days:
+                    d = {}
+                    d = days[day]
+                    if day == calendar.day_name[datetime.today().weekday()]:
+                        today_outbound_departure = d['suggested_departure']
+                        today_outbound_time_saved = d['time_saved']
+
+                    total_saved_minutes += d['time_saved']
+                    total_days += 1
+                    if day in ts_out:
+                        ts_out[day] += d['time_saved']
+                    else:
+                        ts_out[day] = d['time_saved']
+
+                days = {}
+                ts_home = total_saved['homebound']
+                days = stat['homebound']
+                for day in days:
+                    d = {}
+                    d = days[day]
+                    if day == calendar.day_name[datetime.today().weekday()]:
+                        today_homebound_departure = d['suggested_departure']
+                        today_homebound_time_saved = d['time_saved']
+
+                    total_saved_minutes += d['time_saved']
+                    total_days += 1
+                    if day in ts_home:
+                        ts_home[day] += d['time_saved']
+                    else:
+                        ts_home[day] = d['time_saved']
+
+            if total_days > 0:
+                hours_per_year = (total_saved_minutes / 60.0) * 336.0 / total_days
+
+            return json.dumps({'success':True,
+                               'total_saved_minutes': total_saved_minutes ,
+                               'total_saved':total_saved,
+                               'since':str(min_date),
+                               'yearly_projected':hours_per_year,
+                               'today_outbound_departure': today_outbound_departure,
+                               'today_outbound_time_saved': today_outbound_time_saved,
+                               'today_homebound_departure': today_homebound_departure,
+                               'today_homebound_time_saved': today_homebound_time_saved,
+                               }), 200, {'ContentType':'application/json'}
+        else:
+            print 'Stats not found'
+            return json.dumps({'success':False}), 200, {'ContentType':'application/json'}
+
+    except Exception, e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
+
+@crossdomain(origin='*')
+def next_weekday(d, weekday):
+    try:
+        d = d.date()
+        days_ahead = weekday - d.weekday()
+
+        if days_ahead <= 0: # Target day already happened this week
+            days_ahead += 7
+
+        temp = d + timedelta(days=days_ahead)
+        return str(d + timedelta(days=days_ahead))
+
+    except Exception, e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
+
+@app.route('/hecate/api/v1.0/recommendations', methods=['GET'])
+@crossdomain(origin='*')
+#@oauth.require_oauth()
+def get_recommendations():
+    try:
+        username = request.args.get('username')
+        print username
+
+        # Ensure the username hasn't come through with quotes at the beginning and end
+        if username.startswith('"') and username.endswith('"'):
+            username = username[1:-1]
+
+        # Connect to MongoDB
+        client = MongoClient()
+
+        db = client.Hecate
+        collection = db.Stats
+
+        # Obtain the user details from the DB
+        stats = collection.find({'username': username})
+
+        if stats <> None:
+            recommendation = ''
+            day_numbers = {}
+            for dayname, ind in zip(list(calendar.day_name), range(7)):
+                day_numbers[dayname] = ind
+
+            for stat in stats:
+                r = {}
+                days = {}
+                days = stat['outbound']
+                for day in days:
+                    d = {}
+                    d = days[day]
+                    if d['new_recommendation'] == True:
+                        r['day'] = day
+                        r['date'] = next_weekday(stat['updated_at'], day_numbers[day])
+                        r['suggested_departure'] = d['suggested_departure']
+                        r['route_type'] = 'Outbound'
+                        r['time_saved'] = d['time_saved']
+                        r['updated_date'] = str(stat['updated_at'])
+
+                        recommendation += '<li><a href="">New Recommendation: %s. Possible time saving of %s minutes!</a> <span className="feed-date">%s</span><br/><br/></li>' %(day, d['time_saved'], stat['updated_at'].date() )
+
+                days = {}
+                days = stat['homebound']
+                for day in days:
+                    d = {}
+                    d = days[day]
+                    if d['new_recommendation'] == True:
+                        r['day'] = day
+                        r['date'] = next_weekday(stat['updated_at'], day_numbers[day])
+                        r['suggested_departure'] = d['suggested_departure']
+                        r['route_type'] = 'Outbound'
+                        r['time_saved'] = d['time_saved']
+                        r['updated_date'] = str(stat['updated_at'])
+
+                        recommendation += '<li><a href="">New Recommendation: %s. Possible time saving of %s minutes!</a> <span className="feed-date">%s</span><br/><br/></li>' %(day, d['time_saved'], stat['updated_at'].date() )
+
+            print recommendation
+            return json.dumps(recommendation),200, {'ContentType':'application/json'}
+        else:
+            print 'Stats not found'
+            return json.dumps({'success':False}), 200, {'ContentType':'application/json'}
+
+    except Exception, e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
+
 @app.route('/')
 def index():
     return "Hello, World!"
