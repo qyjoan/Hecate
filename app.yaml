@@ -1,0 +1,40 @@
+application: hecate-1250
+version: 1
+runtime: python27
+threadsafe: true
+api_version: 1
+
+skip_files: |
+ ^(.*/)?(
+ (^(?!.*services).*\.ya?ml)|
+ (#.*#)|
+ (.*~)|
+ (.*\.py[co])|
+ (.git/.*)|
+ (^docs/.*)|
+ (.*node_modules/.*)|
+ (.*bower_components/.*)|
+ (.*test/.*)|
+ (.*\.md)|
+ (.*\.zip)|
+ (^gulpfile.js)|
+ (^package.json)|
+ (^.gitignore)|
+ )$
+
+handlers:
+- url: /static
+  static_dir: server/static
+  secure: always
+
+- url: /build
+  static_dir: server/build
+  secure: always
+
+- url: /
+  script: server.apps.application
+  secure: always
+
+- url: /.*
+  script: server.apps.application
+  secure: always

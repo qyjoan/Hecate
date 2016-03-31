@@ -1,0 +1,33 @@
+{
+  "name": "raid",
+  "version": "0.0.1",
+  "description": "Hecate! Optimize your travel!",
+  "main": "client/main.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "build": "browserify -t [ babelify --presets [ react ] ] client/main.js -o server/build/main.js",
+    "serve": "dev_appserver.py ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/?"
+  },
+  "keywords": [
+    "hecate"
+  ],
+  "private": true,
+  "bugs": {
+    "url": "https://github.com/bovard/?"
+  },
+  "homepage": "https://github.com/?",
+  "dependencies": {
+    "babel-preset-react": "^6.5.0",
+    "babelify": "^7.2.0",
+    "browser-request": "^0.3.3",
+    "react": "^0.14.7",
+    "react-bootstrap": "^0.27.0",
+    "react-dom": "^0.14.7"
+  }
+}
