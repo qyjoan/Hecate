@@ -237,7 +237,7 @@ var Home = React.createClass({
 
             // TODO: SET ALL THE USER PARAMETERS HERE
             this.setState({
-                total_saved: user_data['total_saved_minutes'] + ' Mins Saved',
+                total_saved: parseFloat(user_data['total_saved_minutes']).toFixed(2) + ' Mins Saved',
                 since_date: 'Since: ' + new Date(Date.parse(user_data['since'])).toDateString(),
                 yearly_saved: user_data['yearly_projected'] + ' Hours',
                 today_outbound: user_data['today_outbound_departure'] + ' Departure',

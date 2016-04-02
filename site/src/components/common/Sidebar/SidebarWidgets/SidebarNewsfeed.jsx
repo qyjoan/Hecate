@@ -11,7 +11,7 @@ var SidebarRecommendationsfeed = React.createClass({
 
         // get walking directions from central park to the empire state building
         var http = require("http");
-        var url = "http://54.191.104.28:5000/hecate/api/v1.0/recommendations";
+        var url = "http://54.191.104.28:5000/hecate/api/v1.0/recommendationsNews";
         var data = "user7"
 
         $.ajax({

@@ -182,6 +182,7 @@ def create_user():
 def get_route():
     data = {}
     data = ast.literal_eval(request.data)
+
     #data = dict(urlparse.parse_qsl(request.data))
     start_address = data['start_address']
     end_address = data['end_address']
@@ -313,7 +314,7 @@ def next_weekday(d, weekday):
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         print(exc_type, fname, exc_tb.tb_lineno)
 
-@app.route('/hecate/api/v1.0/recommendations', methods=['GET'])
+@app.route('/hecate/api/v1.0/recommendationsNews', methods=['GET'])
 @crossdomain(origin='*')
 #@oauth.require_oauth()
 def get_recommendations():

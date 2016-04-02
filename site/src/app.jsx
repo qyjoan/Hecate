@@ -67,11 +67,14 @@ const rootRoute = {
         require('./components/pages/dashboard/UIElements/Progressbar'),
       ]
     },
-
     {
       path: '/login',
       component: require('./components/pages/Login'),
       childRoutes: []
+    },
+    {
+      path: '/route_start',
+      component: require('./components/pages/Route_Start'),
     },
     {
       path: '/signup',

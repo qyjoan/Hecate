@@ -49,7 +49,7 @@ var CurrentRoute = React.createClass({
 				<div className="conter-wrapper">
 					<div className="row">
 						<div className="col-md-12">
-							<Panel header={<span>Current Route</span>}
+							<Panel header={<span>Current Route <a href="/#/dashboard/route/">[Edit]</a></span>}
 								bsStyle="primary"
 							>
 								<Table>
