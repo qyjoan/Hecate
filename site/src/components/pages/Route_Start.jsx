@@ -42,7 +42,6 @@ var Splash = React.createClass({
     }
 });
 
-
 var SignUp = React.createClass({
     getInitialState: function () {
         return {
@@ -82,7 +81,7 @@ var SignUp = React.createClass({
         if (this.state.signup) {
             return (<SignUpPhase2 start={this.state.start_address} end={this.state.end_address}
                                   transport={this.state.transport_method}
-                    />)
+                />)
         }
         else {
             return (
@@ -96,8 +95,8 @@ var SignUp = React.createClass({
                                     >
                                     {status}
                                     <Form
-                                          onValidSubmit={this.submit}
-                                          >
+                                        onValidSubmit={this.submit}
+                                        >
 
                                         <ValidatedInput
                                             type='text'
@@ -108,7 +107,7 @@ var SignUp = React.createClass({
                                             errorHelp={{
                                                 required: 'Please enter where you are leaving from',
                                             }}
-                                               placeholder="1600 Amphitheatre Pkwy, Mountain View, CA 94043"
+                                            placeholder="1600 Amphitheatre Pkwy, Mountain View, CA 94043"
                                             />
                                         <ValidatedInput
                                             type='text'
@@ -119,7 +118,7 @@ var SignUp = React.createClass({
                                             errorHelp={{
                                                 required: 'Please enter where you are going',
                                             }}
-                                               placeholder="1401 N Shoreline Blvd, Mountain View, CA 94043"
+                                            placeholder="1401 N Shoreline Blvd, Mountain View, CA 94043"
                                             />
                                         <ValidatedInput
                                             type='select'
@@ -130,7 +129,7 @@ var SignUp = React.createClass({
                                             errorHelp={{
                                                 required: 'Please select a mode of transport.'
                                             }}
-                                               placeholder="select"
+                                            placeholder="select"
                                             >
                                             <option value="driving">Personal Vehicle</option>
                                             <option value="driving">Ride Share</option>
@@ -214,7 +213,7 @@ var SignUpPhase2 = React.createClass({
                                             errorHelp={{
                                                 required: 'Please select at least one day.',
                                             }}
-                                               placeholder="select"
+                                            placeholder="select"
                                             multiple
                                             onChange={this.handleChange}
                                             >
@@ -227,46 +226,35 @@ var SignUpPhase2 = React.createClass({
                                             <option value="Sunday">Sunday</option>
                                         </ValidatedInput>
 
-                                        <ValidatedInput
-                                            type='text'
-                                            label='Where are you going?'
-                                            name='work'
-                                            ref='work'
-                                            validate='required'
-                                            errorHelp={{
-                                                required: 'Please enter where you are going',
-                                            }}
-                                               placeholder="1401 N Shoreline Blvd, Mountain View, CA 94043"
-                                            />
                                         <ValidatedInput ref="leave_time" type="text" name="leave_time"
-                                               label="What time do you plan on leaving?"
-                                               placeholder="7:55am"
-                                            validate='required'
-                                            errorHelp={{
+                                                        label="What time do you plan on leaving?"
+                                                        placeholder="7:55am"
+                                                        validate='required'
+                                                        errorHelp={{
                                                 required: 'Please enter the time you plan on leaving.',
                                             }}
                                             />
                                         <ValidatedInput ref="leave_duration" type="text" name="leave_duration"
-                                               label="How many minutes do you expect it to take?"
-                                               placeholder="30"
-                                            validate='required'
-                                            errorHelp={{
+                                                        label="How many minutes do you expect it to take?"
+                                                        placeholder="30"
+                                                        validate='required'
+                                                        errorHelp={{
                                                 required: 'Please enter how many minutes you expect it to take.',
                                             }}
                                             />
                                         <ValidatedInput ref="leave_early" type="text" name="leave_early"
-                                               label="When is the earliest you would consider leaving?"
-                                               placeholder="7:00am"
-                                            validate='required'
-                                            errorHelp={{
+                                                        label="When is the earliest you would consider leaving?"
+                                                        placeholder="7:00am"
+                                                        validate='required'
+                                                        errorHelp={{
                                                 required: 'Please enter the earliest you would consider leaving.',
                                             }}
                                             />
                                         <ValidatedInput ref="leave_late" type="text" name="leave_late"
-                                               label="When is the latest you would consider leaving?"
-                                               placeholder="8:15am"
-                                                                                        validate='required'
-                                            errorHelp={{
+                                                        label="When is the latest you would consider leaving?"
+                                                        placeholder="8:15am"
+                                                        validate='required'
+                                                        errorHelp={{
                                                 required: 'Please enter the latest you would consider leaving.',
                                             }}
                                             />
@@ -291,6 +279,12 @@ var SignUpPhase2 = React.createClass({
 });
 
 var SignUpPhase3 = React.createClass({
+    getInitialState: function () {
+        return {
+            "complete": null
+        }
+    },
+
     submit: function (e) {
         var outbound_times_data = {};
 
@@ -320,112 +314,255 @@ var SignUpPhase3 = React.createClass({
         body["start_address"] = this.props.start
         body["end_address"] = this.props.end
         body["transport_method"] = this.props.transport
-        body["days"] = this.props.days
+        body["days"] = String(this.props.days)
         body["homebound_outbound"] = 'outbound'
-        body["outbound_times"] = outbound_times_data
-        body["homebound_times"] = homebound_times_data
-        console.log(body)
+        body["outbound_times"] = JSON.stringify(outbound_times_data)
+        body["homebound_times"] = JSON.stringify(homebound_times_data)
 
-        var options = {
-            method: "POST",
-            url: "http://test.com",
-            "body": body,
-            "json": true
-        };
-
-        request(options, function (er, response, body) {
-            if (er) {
-                console.log(er)
-            } else {
-                console.log(body);
-                this.props.setResults(body);
+        this.setState(
+            {
+                outbound_times: outbound_times_data,
+                homebound_times: homebound_times_data
             }
-        }.bind(this));
+        )
+
+        var http = require("http");
+        var url = "http://54.191.104.28:5000/hecate/api/v1.0/route";
+        var post_data = body
+
+        $.ajax({
+            type: "POST",
+            url: url,
+            dataType: 'json',
+            data: post_data,
+            success: this.handleFormSuccess,
+            error: this.handleFormFailure
+        });
     },
+
+    handleFormSuccess: function (data) {
+        console.log('Got Route Success');
+        console.log(data)
+        this.setState(
+            {
+                outbound_data: data['outbound_data'],
+                //homebound_data: JSON.stringify(route['homebound_data']),
+                complete: true
+            }
+        )
+        this.render()
+    },
+
+    handleFormFailure: function () {
+        console.log('Got Route Failure');
+    },
+
     render: function () {
-        return (
-            <div>
-                <pageheader id="heading" pagename="Form" subtitle="Enter Route"></pageheader>
-                <div className="conter-wrapper home-container">
-                    <div className="row home-row">
-                        <div className="col-md-12">
-                            <Panel header={<span>What Time Do you return?</span>}
-                                   bsStyle="info"
-                                >
-                                {status}
-                                <Form onValidSubmit={this.submit}>
-                                    <ValidatedInput ref="return_time" type="text" name="return_time"
-                                           label="What time do you plan on coming back?"
-                                           placeholder="4:55pm"
-                                        validate='required'
-                                        errorHelp={{
-                                            required: 'Please enter the time you plan on coming back.',
-                                        }}
-                                        />
-                                    <ValidatedInput ref="return_duration" type="text" name="return_duration"
-                                           label="How many minutes do you expect it to take?"
-                                           placeholder="25"
-                                        validate='required'
-                                        errorHelp={{
-                                            required: 'Please enter how many minutes you expect it to take.',
-                                        }}
-                                        />
-                                    <ValidatedInput ref="return_early" type="text" name="return_early"
-                                           label="When is the earliest you would consider leaving?"
-                                           placeholder="4:45pm"
-                                        validate='required'
-                                        errorHelp={{
-                                            required: 'Please enter the earliest you would consider leaving.',
-                                        }}
-                                        />
-                                    <ValidatedInput ref="return_late" type="text" name="return_late"
-                                           label="When is the latest you would consider leaving?"
-                                           placeholder="5:15pm"
-                                        validate='required'
-                                        errorHelp={{
-                                            required: 'Please enter the latest you would consider leaving.',
-                                        }}
-                                        />
+        if (this.state.complete) {
+            return (<Results outbound_data={this.state.outbound_data} current_start={this.props.current_start}/>)
+        }
+        else {
+            return (
+                <div>
+                    <pageheader id="heading" pagename="Form" subtitle="Enter Route"></pageheader>
+                    <div className="conter-wrapper home-container">
+                        <div className="row home-row">
+                            <div className="col-md-12">
+                                <Panel header={<span>What Time Do you return?</span>}
+                                       bsStyle="info"
+                                    >
+                                    {status}
+                                    <Form onValidSubmit={this.submit}>
+                                        <ValidatedInput ref="return_time" type="text" name="return_time"
+                                                        label="What time do you plan on coming back?"
+                                                        placeholder="4:55pm"
+                                                        validate='required'
+                                                        errorHelp={{
+                        required: 'Please enter the time you plan on coming back.',
+                    }}
+                                            />
+                                        <ValidatedInput ref="return_duration" type="text" name="return_duration"
+                                                        label="How many minutes do you expect it to take?"
+                                                        placeholder="25"
+                                                        validate='required'
+                                                        errorHelp={{
+                        required: 'Please enter how many minutes you expect it to take.',
+                    }}
+                                            />
+                                        <ValidatedInput ref="return_early" type="text" name="return_early"
+                                                        label="When is the earliest you would consider leaving?"
+                                                        placeholder="4:45pm"
+                                                        validate='required'
+                                                        errorHelp={{
+                        required: 'Please enter the earliest you would consider leaving.',
+                    }}
+                                            />
+                                        <ValidatedInput ref="return_late" type="text" name="return_late"
+                                                        label="When is the latest you would consider leaving?"
+                                                        placeholder="5:15pm"
+                                                        validate='required'
+                                                        errorHelp={{
+                        required: 'Please enter the latest you would consider leaving.',
+                    }}
+                                            />
                                         <ButtonInput
                                             type='submit'
                                             bsSize='large'
                                             bsStyle='primary'
                                             value='Optimize!'
                                             />
-                                </Form>
+                                    </Form>
 
-                            </Panel>
+                                </Panel>
 
+                            </div>
                         </div>
+
                     </div>
 
                 </div>
-
-            </div>
-        );
+            );
+        }
     }
 });
 
 var Results = React.createClass({
-    getInitialState: function () {
-        return {
-            "leaveIDX": 0,
-            "returnIDX": 0
-        }
+
+    getIconUrl: function (icon) {
+        //icon .pngs placed in github io repo
+        console.log("../../../../common/images/" + icon + ".png")
+        return "../../../../common/images/" + icon + ".png";
     },
     render: function () {
-        var saveLoseLeave = this.props.results.leave_savings[this.state.leaveIDX] < 0 ? "save" : "lose";
-        var saveLoseReturn = this.props.results.leave_savings[this.state.returnIDX] < 0 ? "save" : "lose";
+        var outbound = this.props.outbound_data;
+        var html = ""
+
+        if ('Monday' in outbound) {
+            var day = outbound['Monday']
+            var w = day['weather']
+            var weather = w['start_address']
+            var temp = weather['temperature']
+            var celcius = temp['celcius']
+            var max_temp = celcius['max']
+            var min_temp = celcius['min']
+            html += "<tr>"
+            html += "<td>Monday</td>"
+            html += "<td>" + weather['weather'] + " - " + min_temp + " to " + max_temp + " degrees.</td>"
+            html += "<td>" + day['optimal_time'] + "</td>"
+            html += "<td>" + day['optimal_duration'] + "</td>"
+            html += "</tr>"
+        }
+
+        if ('Tuesday' in outbound) {
+            var day = outbound['Tuesday']
+            var w = day['weather']
+            var weather = w['start_address']
+            var temp = weather['temperature']
+            var celcius = temp['celcius']
+            var max_temp = celcius['max']
+            var min_temp = celcius['min']
+            html += "<tr>"
+            html += "<td>Tuesday</td>"
+            html += "<td>" + weather['weather'] + " - " + min_temp + " to " + max_temp + " degrees.</td>"
+            html += "<td>" + day['optimal_time'] + "</td>"
+            html += "<td>" + day['optimal_duration'] + "</td>"
+            html += "</tr>"
+        }
+
+        if ('Wednesday' in outbound) {
+            var day = outbound['Wednesday']
+            var w = day['weather']
+            var weather = w['start_address']
+            var temp = weather['temperature']
+            var celcius = temp['celcius']
+            var max_temp = celcius['max']
+            var min_temp = celcius['min']
+            html += "<tr>"
+            html += "<td>Wednesday</td>"
+            html += "<td>" + weather['weather'] + " - " + min_temp + " to " + max_temp + " degrees.</td>"
+            html += "<td>" + day['optimal_time'] + "</td>"
+            html += "<td>" + day['optimal_duration'] + "</td>"
+            html += "</tr>"
+        }
+
+        if ('Thursday' in outbound) {
+            var day = outbound['Thursday']
+            var w = day['weather']
+            var weather = w['start_address']
+            var temp = weather['temperature']
+            var celcius = temp['celcius']
+            var max_temp = celcius['max']
+            var min_temp = celcius['min']
+            html += "<tr>"
+            html += "<td>Thursday</td>"
+            html += "<td>" + weather['weather'] + " - " + min_temp + " to " + max_temp + " degrees.</td>"
+            html += "<td>" + day['optimal_time'] + "</td>"
+            html += "<td>" + day['optimal_duration'] + "</td>"
+            html += "</tr>"
+        }
+
+        if ('Friday' in outbound) {
+            var day = outbound['Friday']
+            var w = day['weather']
+            var weather = w['start_address']
+            var temp = weather['temperature']
+            var celcius = temp['celcius']
+            var max_temp = celcius['max']
+            var min_temp = celcius['min']
+            html += "<tr>"
+            html += "<td>Friday</td>"
+            html += "<td>" + weather['weather'] + " - " + min_temp + " to " + max_temp + " degrees.</td>"
+            html += "<td>" + day['optimal_time'] + "</td>"
+            html += "<td>" + day['optimal_duration'] + "</td>"
+            html += "</tr>"
+        }
+
+        if ('Saturday' in outbound) {
+            var day = outbound['Saturday']
+            var w = day['weather']
+            var weather = w['start_address']
+            var temp = weather['temperature']
+            var celcius = temp['celcius']
+            var max_temp = celcius['max']
+            var min_temp = celcius['min']
+            html += "<tr>"
+            html += "<td>Saturday</td>"
+            html += "<td>" + weather['weather'] + " - " + min_temp + " to " + max_temp + " degrees.</td>"
+            html += "<td>" + day['optimal_time'] + "</td>"
+            html += "<td>" + day['optimal_duration'] + "</td>"
+            html += "</tr>"
+        }
+
+        if ('Sunday' in outbound) {
+            var day = outbound['Sunday']
+            var w = day['weather']
+            var weather = w['start_address']
+            var temp = weather['temperature']
+            var celcius = temp['celcius']
+            var max_temp = celcius['max']
+            var min_temp = celcius['min']
+            html += "<tr>"
+            html += "<td>Sunday</td>"
+            html += "<td>" + weather['weather'] + " - " + min_temp + " to " + max_temp + " degrees.</td>"
+            html += "<td>" + day['optimal_time'] + "</td>"
+            html += "<td>" + day['optimal_duration'] + "</td>"
+            html += "</tr>"
+        }
+
         return (
 
             <Well>
-                <p>By leaving at {this.props.results.leave_times[0]} you
-                    could {saveLoseLeave} {this.props.results.leave_savings[0]}</p>
+                <p>Outbound Data:</p>
 
-                <p>By returning at {this.props.results.return_times[0]} you
-                    could {saveLoseReturn} {this.props.results.return_savings[0]}</p>
-
-                <p></p>
+                <table>
+                    <thead>
+                    <td>Day</td>
+                    <td>Weather</td>
+                    <td>Optimal Departure Time</td>
+                    <td>Duration</td>
+                    </thead>
+                    <tbody dangerouslySetInnerHTML={{__html: html}} />
+                    </table>
 
                 <p>Is this a commute? Would you like us to monitor this route for you?</p>
             </Well>
