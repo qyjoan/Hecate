@@ -26,8 +26,6 @@ function newRoute() {
 
 var MapRoute = React.createClass({
     getInitialState: function () {
-        console.log('InitialState')
-        console.log(this.props.user)
         return {
             routes: this.load(),
             previousRoute: -1,
@@ -115,13 +113,9 @@ var MapRoute = React.createClass({
         vent.trigger('map:route:way-points:update');
     },
     load: function () {
-        console.log('loading...')
         var saved = null,
             routes = null;
-        console.log(this.props.user)
             var route = this.props.user['route'];
-            console.log ('Updating Route...');
-            console.log(route);
             if (route == undefined) {
                 route = {};
                 route['days'] = [];

@@ -45,7 +45,6 @@ var TopNav = React.createClass({
                     <span className="hidden-sm">{this.props.user['name']}</span>
                     </span>} noCaret className="dropdown admin-dropdown"
                             >
-                            <li><Link to="/dashboard/profile">{Translate.getWord('profilee')}</Link></li>
                             <li><Link to="/login">{Translate.getWord('logout')}</Link></li>
                         </NavDropdown>
 
@@ -58,7 +57,6 @@ var TopNav = React.createClass({
                     <img src={require("../../../common/images/flat-avatar.png")} className="topnav-img" alt="" />
                     </span>} noCaret className="dropdown admin-dropdown"
                         >
-                        <li><Link to="/dashboard/profile">{Translate.getWord('profilee')}</Link></li>
                         <li><Link to="/login">{Translate.getWord('logout')}</Link></li>
                     </NavDropdown>
                 </ul>
@@ -69,18 +67,17 @@ var TopNav = React.createClass({
     },
 
     changeTheme: function (setTheme) {
-
         $('<link>')
             .appendTo('head')
             .attr({type: 'text/css', rel: 'stylesheet/less'})
             .attr('href', '/app/src/common/styles/app-' + setTheme + '.less?v=' + window.app_version);
 
-        // console.log("inside change themes");
-        // var styleObj = require('file!../../../common/styles/base.less');
-        // console.log("styles", styleObj);
-        // var style = require("style/useable!less!../../../common/styles/app-red.useable.less");
-        // style.use();
-        // console.log("style successful");
+        //console.log("inside change themes");
+        //var styleObj = require('file!../../../common/styles/base.less');
+        //console.log("styles", styleObj);
+        //var style = require("style/useable!less!../../../common/styles/app-red.useable.less");
+        //style.use();
+        //console.log("style successful");
     },
 
     _onChange: function () {

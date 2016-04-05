@@ -13,7 +13,6 @@ var CurrentRoute = React.createClass({
     },
 
   render: function() {
-	  console.log('Address')
 	  var route = this.props.user['route']
 	  if (route == undefined) {
 		  route = {};
@@ -69,7 +68,6 @@ var CurrentRoute = React.createClass({
 									</tbody>
 								</Table>
 							</Panel>
-							<br>Put in Google Maps of Route with Instructions here</br>
 						</div>
 					</div>
 

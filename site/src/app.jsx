@@ -1,4 +1,4 @@
-import React from 'react';
+  import React from 'react';
 import { render } from 'react-dom';
 import { createHistory, useBasename } from 'history';
 import { Router, Route, IndexRoute } from 'react-router';
@@ -38,33 +38,8 @@ const rootRoute = {
         component: require('./components/pages/dashboard/Home/Home')
       },
       childRoutes: [
-        require('./components/pages/dashboard/Blank'),
-        require('./components/pages/dashboard/Calendar'),
-        require('./components/pages/dashboard/Charts/ChartC3'),
-        require('./components/pages/dashboard/Charts/Chartjs'),
-        require('./components/pages/dashboard/Docs'),
-        require('./components/pages/dashboard/Forms/Components'),
-        require('./components/pages/dashboard/Forms/Elements'),
-        require('./components/pages/dashboard/Grid'),
         require('./components/pages/dashboard/Home'),
-        require('./components/pages/dashboard/Invoice'),
-        require('./components/pages/dashboard/Mail/Compose'),
-        require('./components/pages/dashboard/Mail/Inbox'),
-        require('./components/pages/dashboard/Panels'),
-        require('./components/pages/dashboard/Profile'),
         require('./components/pages/dashboard/Route'),
-        require('./components/pages/dashboard/Table'),
-        require('./components/pages/dashboard/Tabs'),
-        require('./components/pages/dashboard/Typography'),
-        require('./components/pages/dashboard/UIElements/Alert'),
-        require('./components/pages/dashboard/UIElements/Button'),
-        require('./components/pages/dashboard/UIElements/Collapse'),
-        require('./components/pages/dashboard/UIElements/Dropdown'),
-        require('./components/pages/dashboard/UIElements/Icons'),
-        require('./components/pages/dashboard/UIElements/Modal'),
-        require('./components/pages/dashboard/UIElements/OtherElements'),
-        require('./components/pages/dashboard/UIElements/Pagination'),
-        require('./components/pages/dashboard/UIElements/Progressbar'),
       ]
     },
     {
@@ -75,11 +50,6 @@ const rootRoute = {
     {
       path: '/route_start',
       component: require('./components/pages/Route_Start'),
-    },
-    {
-      path: '/signup',
-      component: require('./components/pages/Signup'),
-      childRoutes: []
     },
     {
       path: '/error-page',

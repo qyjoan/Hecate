@@ -20,6 +20,7 @@ var MenuBar = React.createClass({
   },
   
   hideMenu: function(){
+    console.log('hiding menu')
     $('.dashboard-page').toggleClass('push-right');   
   },
 

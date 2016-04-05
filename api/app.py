@@ -80,12 +80,40 @@ def initialise_days(days):
     return_dates = []
     for day in days:
         return_dates.append(day_to_date[day])
-    print return_dates
     return return_dates
 
 
 app = Flask(__name__)
 
+@app.route('/hecate/api/v1.0/login', methods=['POST'])
+@crossdomain(origin='*')
+# @oauth.require_oauth()
+def login():
+    try:
+        user_Object = User()
+
+        username = request.form['username']
+        password = request.form['password']
+
+        print 'Loggin In with username %s and password %s' %(username, password)
+
+        # Ensure the username hasn't come through with quotes at the beginning and end
+        if username.startswith('"') and username.endswith('"'):
+            username = username[1:-1]
+
+        # Initialise the user object
+        user_Object.Initialise(username)
+
+        if password == user_Object.password:
+            return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
+        else:
+            return json.dumps({'success': False}), 400, {'ContentType': 'application/json'}
+
+    except Exception, e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
+        return json.dumps({'success': False}), 200, {'ContentType': 'application/json'}
 
 @app.route('/hecate/api/v1.0/getUser', methods=['GET'])
 @crossdomain(origin='*')
@@ -95,15 +123,20 @@ def get_user():
         user_Object = User()
 
         username = request.args.get('username')
+        print 'Username: %s' %username
 
-        # Ensure the username hasn't come through with quotes at the beginning and end
-        if username.startswith('"') and username.endswith('"'):
-            username = username[1:-1]
+        if username <> None:
+            # Ensure the username hasn't come through with quotes at the beginning and end
+            if username.startswith('"') and username.endswith('"'):
+                username = username[1:-1]
 
-        # Initialise the user object
-        response = user_Object.Initialise(username)
+            # Initialise the user object
+            response = user_Object.Initialise(username)
 
-        return user_Object.JSON_Output()
+            return json.dumps({'success': True, 'data': response}), 200, {'ContentType': 'application/json'}
+        else:
+            return json.dumps({'success': False}), 400, {'ContentType': 'application/json'}
+
         # return jsonpickle.encode(user_Object)
 
     except Exception, e:
@@ -145,12 +178,9 @@ def update_route():
     try:
         data = {}
         data = request.json
-        print data
         username = request.form['username']
         route = ast.literal_eval(request.form['route'])
 
-        print username
-        print route
         user_Object = User()
 
         # Initialise the user object
@@ -178,7 +208,6 @@ def create_user():
         data = ast.literal_eval(request.data)
     except ValueError as e:
         print ("<p>Error: %s</p>" % e.message)
-    print data
 
     user = User()
     response = user.CreateUser(data)
@@ -192,22 +221,12 @@ def create_user():
 def get_route():
     try:
         # data = dict(urlparse.parse_qsl(request.data))
-        print "Request.data %s" %request.data
-        print "Request.json %s" %request.json
-        print request.form
         start_address = request.form['start_address']
-        print start_address
         end_address = request.form['end_address']
-        print end_address
         transport_method = request.form['transport_method']
-        print transport_method
-        print request.form['days'].split(",")
         travel_days = initialise_days(request.form['days'].split(","))
-        print travel_days
         homebound_outbound = request.form['homebound_outbound']
-        print homebound_outbound
         outbound_times = json.loads(request.form['outbound_times'])
-        print outbound_times
 
         for item in outbound_times:
             outbound_times[item]['earliest_start'] = outbound_times[item]['earliest_start'].replace('am', '')
@@ -297,7 +316,6 @@ def get_route():
             day_data['optimal_time'] = fastest_tod
             day_data['optimal_duration'] = fastest_duration
 
-        print day
         return json.dumps({'success': True,
                            'outbound_data': day,
                            'homebound_data': homebound_data
@@ -315,7 +333,6 @@ def get_route():
 def get_stats():
     try:
         username = request.args.get('username')
-        print username
 
         # Ensure the username hasn't come through with quotes at the beginning and end
         if username.startswith('"') and username.endswith('"'):
@@ -382,10 +399,10 @@ def get_stats():
                 hours_per_year = (total_saved_minutes / 60.0) * 336.0 / total_days
 
             return json.dumps({'success': True,
-                               'total_saved_minutes': total_saved_minutes,
+                               'total_saved_minutes': float("{0:.2f}".format(total_saved_minutes)),
                                'total_saved': total_saved,
                                'since': str(min_date),
-                               'yearly_projected': hours_per_year,
+                               'yearly_projected': float("{0:.2f}".format(hours_per_year)),
                                'today_outbound_departure': today_outbound_departure,
                                'today_outbound_time_saved': today_outbound_time_saved,
                                'today_homebound_departure': today_homebound_departure,
@@ -425,7 +442,6 @@ def next_weekday(d, weekday):
 def get_recommendations():
     try:
         username = request.args.get('username')
-        print username
 
         # Ensure the username hasn't come through with quotes at the beginning and end
         if username.startswith('"') and username.endswith('"'):
@@ -480,7 +496,6 @@ def get_recommendations():
                         recommendation += '<li><a href="">New Recommendation: %s. Possible time saving of %s minutes!</a> <span className="feed-date">%s</span><br/><br/></li>' % (
                         day, d['time_saved'], stat['updated_at'].date())
 
-            print recommendation
             return json.dumps(recommendation), 200, {'ContentType': 'application/json'}
         else:
             print 'Stats not found'

@@ -1,4 +1,5 @@
 import React, { PropTypes, Component } from 'react';
+import Router from 'react-router';
 import { Link } from "react-router";
 import {ProgressBar, Panel} from 'react-bootstrap';
 import C3Chart from "../../../common/ChartElement/C3Chart";
@@ -9,6 +10,7 @@ import vectorMap from '../../../common/jquery-jvectormap-2.0.3/jquery-jvectormap
 import code from '../../../common/jquery-jvectormap-2.0.3/jquery-jvectormap-world-mill-en';
 import AppStore from '../../../../stores/AppStore';
 import Translate from '../../../common/Translate';
+import {History} from 'history';
 
 var GoogleMaps = require('google-maps'),
     ReactDOM = require('react-dom');
@@ -174,50 +176,58 @@ let options2 = {
 };
 
 var Home = React.createClass({
+        mixins: [History],
+
+        componentWillMount: function() {
+            var username = sessionStorage.getItem('username');
+
+            if (!username) {
+                this.props.history.push('/login');
+            }
+            else {
+                this.state.username = username;
+            }
+        },
 
         loadUserFromServer: function () {
-            console.log('Home Loading')
-            var self = this;
-
-            // get walking directions from central park to the empire state building
             var http = require("http");
             var url = "http://54.191.104.28:5000/hecate/api/v1.0/getUser";
-            var data = "user7"
+            var data = this.state.username  //'user7'
 
-            $.ajax({
-                type: "GET",
-                url: url,
-                data: {username: data},
-                success: this.handleSubmitSuccess,
-                error: this.handleSubmitFailure,
-            });
+            if (data) {
+                $.ajax({
+                    type: "GET",
+                    url: url,
+                    data: {username: data},
+                    success: this.handleSubmitSuccess,
+                    error: this.handleSubmitFailure,
+                });
+            }
 
-            // get walking directions from central park to the empire state building
             var http = require("http");
             var url = "http://54.191.104.28:5000/hecate/api/v1.0/stats";
-            var data = "user7"
+            var data = this.state.username //'user7'
 
-            $.ajax({
-                type: "GET",
-                url: url,
-                data: {username: data},
-                success: this.handleStatsSubmitSuccess,
-                error: this.handleStatsSubmitFailure,
-            });
+            if (data) {
+                $.ajax({
+                    type: "GET",
+                    url: url,
+                    data: {username: data},
+                    success: this.handleStatsSubmitSuccess,
+                    error: this.handleStatsSubmitFailure,
+                });
+            }
 
         }, // load from server end
 
         handleSubmitSuccess: function (data) {
-            console.log('Submit Success')
-            console.log(data)
             var user_data = JSON.parse(data);
 
             // TODO: SET ALL THE USER PARAMETERS HERE
             this.setState({
-                user: user_data,
+                user: JSON.parse(user_data['data']),
             })
             this.loadMaps()
-            console.log(user_data)
         },
 
         handleSubmitFailure: function (xhr, ajaxOptions, thrownError) {
@@ -225,8 +235,6 @@ var Home = React.createClass({
         },
 
         handleStatsSubmitSuccess: function (data) {
-            console.log('Stats Submit Success')
-            console.log(data)
             var user_data = JSON.parse(data);
             if (user_data['today_outbound_time_saved'] > 0) {
                 var sub = 'Outbound (Save ' + user_data['today_outbound_time_saved'] + ' mins)'
@@ -246,24 +254,22 @@ var Home = React.createClass({
         },
 
         handleSubmitFailure: function (xhr, ajaxOptions, thrownError) {
-            console.log('Error')
+            console.log('Get User Error')
         },
 
         getInitialState: function () {
 
             return {
-                user: {}
+                user: {},
+                username: null
             };
 
         },
 
         loadMaps: function () {
-            console.log('Loading Maps')
             GoogleMaps.LIBRARIES = ['places'];
             GoogleMaps.KEY = 'AIzaSyAG7Mj4xcF8hVd0_r1CNUXCpI5ycPly6eY';
             user = this.state.user;
-            console.log('User: ')
-            console.log(this.state.user)
             GoogleMaps.load(function (google) {
                 ReactDOM.render(<MapRoute mapService={google} user={user}></MapRoute>, document.getElementById('maps'))
             });
@@ -375,7 +381,7 @@ var Home = React.createClass({
                             </div>
                         </div>
                         <div className="row home-row">
-                            <div className="col-lg-10 col-md-10">
+                            <div className="col-lg-12 col-md-12">
                                 <div className="maps" id="maps" align="center"></div>
                             </div>
                         </div>

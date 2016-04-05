@@ -1,3 +1,4 @@
+import {Panel, Table} from 'react-bootstrap';
 var React = require('react'),
     vent = require('../util/vent'),
     Promise = require('promise');
@@ -19,7 +20,7 @@ var Map = React.createClass({
         this.renderMap({
             zoom: 7,
             center: DEFAULT_LOCATION,
-            disableDefaultUI:true
+            disableDefaultUI: true
         });
         placesService = new google.maps.places.PlacesService(this.map);
 
@@ -134,12 +135,38 @@ var Map = React.createClass({
         mapCanvas.style.height = vH + 'px';
         this.map = new google.maps.Map(mapCanvas, mapOptions);
         directionsDisplay.setMap(this.map);
-
+        directionsDisplay.setPanel(document.getElementById("map-directions"));
     },
     render: function () {
         return (
-            <div id='map' className='route-map'></div>
-            );
+            <div>
+                <pageheader pagename="Table" subtitle="Bootstrap UI Elements"></pageheader>
+                <div className="conter-wrapper">
+                    <div className="row">
+                        <div className="col-md-12">
+                                <Table>
+                                    <tbody>
+                                    <tr>
+                                        <td width='70%'>
+                                            <div id='map' className='route-map'></div>
+                                        </td>
+                                        <td width='30%'>
+                                            							<Panel header={<span>Directions</span>}
+								bsStyle="primary"
+							>
+
+                                            <div id='map-directions'></div>
+                                                                            </Panel>
+                                        </td>
+
+                                    </tr>
+                                    </tbody>
+                                </Table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
     }
 });
 

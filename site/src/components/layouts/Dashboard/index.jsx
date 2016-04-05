@@ -10,13 +10,26 @@ import Home from '../../pages/dashboard/Home/Home';
 
 var HomePage = React.createClass({
 
+    componentWillMount: function() {
+        this.setState({Height: $(window).height()});
+
+        var user_name = sessionStorage.getItem('username');
+
+        if (!user_name) {
+            this.props.history.push('/login');
+        }
+        else {
+            this.setState({username: user_name})
+        }
+    },
+
     loadUserFromServer: function () {
         var self = this;
 
         // get walking directions from central park to the empire state building
         var http = require("http");
         var url = "http://54.191.104.28:5000/hecate/api/v1.0/getUser";
-        var data = "user7"
+        var data = this.state.username //"user7"
 
         $.ajax({
             type: "GET",
@@ -29,22 +42,16 @@ var HomePage = React.createClass({
     }, // load from server end
 
     handleSubmitSuccess: function (data) {
-        console.log(data)
         var user_data = JSON.parse(data);
 
         // TODO: SET ALL THE USER PARAMETERS HERE
         this.setState({
-            user: user_data,
+            user: user_data
         })
-        console.log(user_data)
     },
 
     handleSubmitFailure: function (xhr, ajaxOptions, thrownError) {
         console.log('Error')
-    },
-
-    componentWillMount: function () {
-        this.setState({Height: $(window).height()});
     },
 
     componentDidMount: function () {
@@ -60,7 +67,8 @@ var HomePage = React.createClass({
     getInitialState: function () {
 
         return {
-            user: {}
+            user: {},
+            username: null
         };
 
     },
@@ -71,15 +79,16 @@ var HomePage = React.createClass({
 
     render: function () {
 
-        console.log('Dashboard/index.jsx ' + this.state.user)
         const { pathname } = this.props.location;
 
+        if (this.state.username)
+        {
         return (
             <div className="dashboard-page">
 
                 <TopNav user={this.state.user}></TopNav>
 
-                <Sidebar user={this.state.user}></Sidebar>
+                <Sidebar user={this.state.username}></Sidebar>
 
                 <ReactCSSTransitionGroup component="div"
                                          transitionName="ng"
@@ -95,6 +104,12 @@ var HomePage = React.createClass({
 
             </div>
         );
+        }
+        else{
+            return (
+                <div className="dashboard-page" />
+        );
+        }
     },
 
     statics: {

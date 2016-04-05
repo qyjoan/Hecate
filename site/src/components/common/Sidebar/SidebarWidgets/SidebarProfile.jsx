@@ -10,8 +10,8 @@ var SidebarProfile = React.createClass({
 
   render: function(){
     return ( <div className="text-center">
-        <Link to="/dashboard/profile"><img src={require("../../../../common/images/flat-avatar.png")} className="user-avatar" /></Link>
-        <div className="text-center avatar-name">{this.props.user['username']}
+        <img src={require("../../../../common/images/flat-avatar.png")} className="user-avatar" />
+        <div className="text-center avatar-name">{this.props.user}
         </div>
       </div>
     );
