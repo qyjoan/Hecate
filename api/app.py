@@ -131,7 +131,9 @@ def get_user():
                 username = username[1:-1]
 
             # Initialise the user object
-            response = user_Object.Initialise(username)
+            user_Object.Initialise(username)
+
+            response = user_Object.JSON_Output()
 
             return json.dumps({'success': True, 'data': response}), 200, {'ContentType': 'application/json'}
         else:
@@ -214,6 +216,63 @@ def create_user():
 
     return response
 
+def buildJSON(data):
+    day = {}
+
+    for item in data:
+        route = item[0]
+        day_name = route['departure_day']
+        day[day_name] = {}
+        d = {}
+        d['start_address'] = route['start_address']
+        d['end_address'] = route['end_address']
+        d['weather'] = route['weather']
+        d['routes'] = []
+        day[day_name] = d
+
+    for item in data:
+        route = item[0]
+        day_name = route['departure_day']
+        i = {}
+
+        legs = {}
+        legs = route['legs'][0]
+        duration = {}
+        duration = legs['duration_in_traffic']
+        i['duration_in_traffic'] = duration
+        i['duration_in_traffic_value'] = duration['value']
+        i['departure_time_of_day'] = route['departure_time_of_day']
+        i['departure_day'] = route['departure_day']
+        i['fastest'] = False
+
+        d = day[day_name]
+        d['routes'].append(i)
+
+    for d in day:
+        day_data = day[d]
+        l = day_data['routes']
+
+        fastest_index = 0
+        current_fastest = 9999
+        fastest_tod = ""
+
+        idx = 0
+        for item in l:
+            if item['duration_in_traffic_value'] < current_fastest:
+                fastest_tod = item['departure_time_of_day']
+                duration = item['duration_in_traffic']
+                fastest_duration = duration['text']
+                current_fastest = item['duration_in_traffic_value']
+                fastest_index = idx
+            idx += 1
+
+        data = {}
+        data = l[fastest_index]
+        data['fastest'] = True
+        day_data['optimal_time'] = fastest_tod
+        day_data['optimal_duration'] = fastest_duration
+
+    return day
 
 @app.route('/hecate/api/v1.0/route', methods=['POST'])
 @crossdomain(origin='*')
@@ -233,7 +292,6 @@ def get_route():
             outbound_times[item]['latest_start'] = outbound_times[item]['latest_start'].replace('am', '').replace('pm', '')
             outbound_times[item]['current_start'] = outbound_times[item]['current_start'].replace('am', '').replace('pm',
                                                                                                                     '')
-
         homebound_times = json.loads(request.form['homebound_times'])
         for item in homebound_times:
             homebound_times[item]['earliest_home'] = homebound_times[item]['earliest_home'].replace('am', '').replace('pm',
@@ -247,78 +305,21 @@ def get_route():
                                'anonymous', 'departure', homebound_outbound, 'api')
         outbound_results = g_outbound.obtain_Insert_API_Data(homebound_outbound)
 
-        outbound_data = []
-        homebound_data = []
 
-        fastest_index = {}
-        fastest_duration = {}
-        fastest_duration['outbound'] = 999999
-        fastest_index['outbound'] = 0
-        fastest_duration['homebound'] = 999999
-        fastest_index['homebound'] = 0
-        index_count = 0
+        g_homebound = Google()
+        g_homebound.init_Future(start_address, end_address, transport_method, travel_days, outbound_times, homebound_times,
+                               'anonymous', 'departure', 'homebound', 'api')
 
-        outbound = {}
-        outbound['route_type'] = 'outbound'
-        outbound['days'] = []
+        homebound_results = g_homebound.obtain_Insert_API_Data(homebound_outbound)
 
-        day = {}
-        for item in outbound_results:
-            route = item[0]
-            day_name = route['departure_day']
-            day[day_name] = {}
-            d = {}
-            d['start_address'] = route['start_address']
-            d['end_address'] = route['end_address']
-            d['weather'] = route['weather']
-            d['routes'] = []
-            day[day_name] = d
+        outbound_routes = buildJSON(outbound_results)
 
-        for item in outbound_results:
-            route = item[0]
-            day_name = route['departure_day']
-            i = {}
+        homebound_routes = buildJSON(homebound_results)
 
-            legs = {}
-            legs = route['legs'][0]
-            duration = {}
-            duration = legs['duration_in_traffic']
-            i['duration_in_traffic'] = duration
-            i['duration_in_traffic_value'] = duration['value']
-            i['departure_time_of_day'] = route['departure_time_of_day']
-            i['departure_day'] = route['departure_day']
-            i['fastest'] = False
-
-            d = day[day_name]
-            d['routes'].append(i)
-
-        for d in day:
-            day_data = day[d]
-            l = day_data['routes']
-
-            fastest_index = 0
-            current_fastest = 9999
-            fastest_tod = ""
-
-            idx = 0
-            for item in l:
-                if item['duration_in_traffic_value'] < current_fastest:
-                    fastest_tod = item['departure_time_of_day']
-                    duration = item['duration_in_traffic']
-                    fastest_duration = duration['text']
-                    current_fastest = item['duration_in_traffic_value']
-                    fastest_index = idx
-                idx += 1
-
-            data = {}
-            data = l[fastest_index]
-            data['fastest'] = True
-            day_data['optimal_time'] = fastest_tod
-            day_data['optimal_duration'] = fastest_duration
 
         return json.dumps({'success': True,
-                           'outbound_data': day,
-                           'homebound_data': homebound_data
+                           'outbound_data': outbound_routes,
+                           'homebound_data': homebound_routes
                            }), 200, {'ContentType': 'application/json'}
 
     except Exception, e:
@@ -352,7 +353,7 @@ def get_stats():
             total_saved['outbound'] = {}
             total_saved['homebound'] = {}
             min_date = None
-            total_saved_minutes = 0
+            total_saved_seconds = 0
             hours_per_year = 0  # Hours saved per week x 48 weeks.
             total_days = 0
 
@@ -371,7 +372,7 @@ def get_stats():
                         today_outbound_departure = d['suggested_departure']
                         today_outbound_time_saved = d['time_saved']
 
-                    total_saved_minutes += d['time_saved']
+                    total_saved_seconds += d['time_saved']
                     total_days += 1
                     if day in ts_out:
                         ts_out[day] += d['time_saved']
@@ -388,7 +389,7 @@ def get_stats():
                         today_homebound_departure = d['suggested_departure']
                         today_homebound_time_saved = d['time_saved']
 
-                    total_saved_minutes += d['time_saved']
+                    total_saved_seconds += d['time_saved']
                     total_days += 1
                     if day in ts_home:
                         ts_home[day] += d['time_saved']
@@ -396,17 +397,17 @@ def get_stats():
                         ts_home[day] = d['time_saved']
 
             if total_days > 0:
-                hours_per_year = (total_saved_minutes / 60.0) * 336.0 / total_days
+                hours_per_year = ((total_saved_seconds / 60.0) / 60.0) * 336.0 / total_days
 
             return json.dumps({'success': True,
-                               'total_saved_minutes': float("{0:.2f}".format(total_saved_minutes)),
+                               'total_saved_minutes': float("{0:.2f}".format(total_saved_seconds / 60.0)),
                                'total_saved': total_saved,
                                'since': str(min_date),
                                'yearly_projected': float("{0:.2f}".format(hours_per_year)),
                                'today_outbound_departure': today_outbound_departure,
-                               'today_outbound_time_saved': today_outbound_time_saved,
+                               'today_outbound_time_saved': today_outbound_time_saved / 60.0,
                                'today_homebound_departure': today_homebound_departure,
-                               'today_homebound_time_saved': today_homebound_time_saved,
+                               'today_homebound_time_saved': today_homebound_time_saved / 60.0,
                                }), 200, {'ContentType': 'application/json'}
         else:
             print 'Stats not found'
