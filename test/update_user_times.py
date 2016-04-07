@@ -21,7 +21,7 @@ client = MongoClient()
 db = client.Hecate
 collection = db.User
 
-results = collection.find()
+results = collection.find({'username': 'user7'})
 for item in results:
     outbound = {}
     homebound = {}

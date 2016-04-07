@@ -33,7 +33,7 @@ def initialise_days(days):
 
     return_dates = []
     for day in days:
-        return_dates.append(day_to_date[day])
+        return_dates.append(day_to_date[day.strip()])
 
     return return_dates
 
@@ -89,7 +89,7 @@ def Process_Route(type, user, days):
     if type == 'outbound':
         # Process the route from A to B (e.g. home to work)
         g = Google()
-        g.init_Future(user.get_Start_Address(), user.get_End_Address(), user.get_Transportation(), travel_days, user.outbound_time, user.homebound_time, user.username, 'departure', 'outbound', 'collect')
+        g.init_Future(user.get_Start_Address(), user.get_End_Address(), user.get_Transportation(), travel_days, user.outbound, user.homebound, user.username, 'departure', 'outbound', 'collect')
 
         # If we only want to output, pass the parameter 'output', else we insert into MongoDB
         if sys.argv[1] == 'output':
@@ -99,7 +99,7 @@ def Process_Route(type, user, days):
     else:
         # Process the route from B to A (e.g. work to home)
         g = Google()
-        g.init_Future(user.get_End_Address(), user.get_Start_Address(), user.get_Transportation(), travel_days, user.outbound_time, user.homebound_time, user.username, 'departure', 'homebound', 'collect')
+        g.init_Future(user.get_End_Address(), user.get_Start_Address(), user.get_Transportation(), travel_days, user.outbound, user.homebound, user.username, 'departure', 'homebound', 'collect')
 
         # If we only want to output, pass the parameter 'output', else we insert into MongoDB
         if sys.argv[1] == 'output':
@@ -149,20 +149,20 @@ if __name__ == '__main__':
                 user.Initialise(item["username"])
 
                 # Initialise the days
-                travel_days = initialise_days(user.travel_days)
+                travel_days = initialise_days(user.days)
 
                 # If the difference in current time and departure time is less than 5 mins, then get live traffic.
                 today = datetime.today().date()
                 today_weekday = calendar.day_name[datetime.today().weekday()]
 
                 # Loop through until we have the start day.
-                while (today_weekday not in user.homebound_time.keys()):
+                while (today_weekday not in user.homebound.keys()):
                     today = today + timedelta(days = 1)
                     today_weekday = calendar.day_name[today.weekday()]
 
                 try:
-                    current_start = datetime.strptime(str(today) + ' ' + user.outbound_time[today_weekday]['current_start'], '%Y-%m-%d %H:%M')
-                    current_home = datetime.strptime(str(today) + ' ' + user.homebound_time[today_weekday]['current_home'], '%Y-%m-%d %H:%M')
+                    current_start = datetime.strptime(str(today) + ' ' + user.outbound[today_weekday]['current_start'], '%Y-%m-%d %H:%M')
+                    current_home = datetime.strptime(str(today) + ' ' + user.homebound[today_weekday]['current_home'], '%Y-%m-%d %H:%M')
 
                     outbound_time_diff = (current_time - current_start).total_seconds()/60
                     homebound_time_diff = (current_time - current_home).total_seconds()/60
@@ -181,7 +181,10 @@ if __name__ == '__main__':
                         # Process Homebound - e.g. work to home
                         Process_Route('homebound', user, travel_days)
 
-                except:
+                except Exception, e:
+                    exc_type, exc_obj, exc_tb = sys.exc_info()
+                    fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                    print(exc_type, fname, exc_tb.tb_lineno, e)
                     print 'No Routes for user %s for day %s. Continuing...' %(user.username, today_weekday)
 
             # See how close departure time is and update next check time accordingly.

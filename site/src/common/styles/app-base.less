@@ -1,0 +1,318 @@
+// wiredep-removed:bower:less
+// wiredep-removed:endbower
+@import "less/bootstrap.less";
+@import "less/variables.less";
+
+@border-color : rgba(0,0,0,0.1);
+
+// Base
+@import "base.less";
+
+// Pages
+@import "less/pages/login.less";
+@import "less/pages/dashboard.less";
+@import "less/pages/home.less";
+@import "less/pages/inbox.less";
+@import "less/pages/compose.less";
+@import "less/pages/profile.less";
+@import "less/pages/invoice.less";
+@import "less/pages/404.less";
+@import "less/pages/docs.less";
+
+//Layout
+@import "layout/sidebar/sidebar.less";
+@import "layout/topnav/topnav.less";
+@import "layout/utils.less";
+
+// Widgets and Effects
+@import "widgets/input-underline.less";
+@import "widgets/calendar.less";
+@import "widgets/stats.less";
+@import "widgets/buttons.less";
+@import "widgets/input-type.less";
+@import "widgets/carousels.less";
+@import "widgets/growl.less";
+@import "widgets/switch.less";
+@import "widgets/todo.less";
+@import "widgets/map.less";
+@import "widgets/progressButton.less";
+@import "widgets/checkbox.less";
+@import "index.less";
+@import "transitions/all.less";
+
+// Other
+.browsehappy {
+  margin: 0.2em 0;
+  background: #ccc;
+  color: #000;
+  padding: 0.2em 0;
+}
+
+.rtl {
+	* {
+		direction: rtl;
+	}
+	#body-container {
+		margin-right: 235px;
+		margin-left: 0;
+	}
+	.navbar-header {
+		float: right;
+	}
+	.side-widgets {
+		margin-left: 0 !important;
+	}
+	#sidebar div.side-menu .menu-body ul.sidenav li ul.nested-dropdown {
+		left: 0;
+		right: 45px;
+	}
+	.radio label, .checkbox label {
+		padding-left: 0;
+		padding-right: 20px;
+	}
+	.checkbox input[type="checkbox"], .radio input[type="radio"] {
+		margin-left: 0;
+		margin-right: -20px;
+	}
+	ul.navbar-right {
+		padding-right: 0;
+	}	
+	.navbar-form {
+		margin-left: 10px;
+	}
+	ul.navbar-nav {
+		padding-right: 0;
+		margin-right: 0;
+	}
+	.topnav-navbar ul.pull-right.navbar-nav {
+		margin-right: 0;
+	}
+}
+
+// }
+// @media only screen and (max-width: 767px) { 
+* {
+	a:hover {
+		cursor: pointer;
+	}
+}
+
+.map {
+    width: 90%;
+    top: 0;
+    left: 0;
+    z-index: 10;
+}
+
+.route-plan {
+    position: absolute;
+    width: 400px;
+    height: 300px;
+    right: 50px;
+    bottom: 100px;
+    padding: 20px;
+    background-color: #ffffff;
+    z-index: 20;
+    overflow: scroll;
+}
+
+.way-points {
+    border-left: 1px solid #dddddd;
+    padding-left: 20px;
+    margin-bottom: 10px;
+}
+
+.way-point {
+    position: relative;
+    padding: 3px 0;
+    cursor: text;
+}
+
+.way-point:last-child {
+    padding-bottom: 0;
+}
+
+.way-point .viewing {
+    border-bottom: 1px solid #dddddd;
+    padding: 3px 0;
+}
+
+.way-point .marker {
+    position: absolute;
+    left: -28px;
+    top: 5px;
+    color: #000000;
+}
+
+.way-point .editing {
+    border-bottom: 1px solid #000000;
+    padding: 3px 0;
+}
+
+.editing input[type='text'] {
+    border: none;
+    font-size: 1rem;
+    outline: none;
+    padding-right: 50px;
+    width: 100%;
+}
+
+.actions {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.viewing .actions {
+    display: none;
+}
+
+.viewing:hover .actions, .way-point-wrapper:last-child .viewing .actions  {
+    display: inline-block;
+}
+
+.viewing .way-point-name {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    font-weight: 300;
+    padding-right: 50px;
+}
+
+.actions a {
+    text-decoration: none;
+    color: #666666;
+    font-size: 1.2rem;
+}
+
+.actions a:hover {
+    color: #000000;
+}
+
+ul.actions li {
+    display: inline-block;
+    margin-left: 5px;
+}
+
+.route-info {
+    font-size: .8rem;
+    color: #333333;
+    padding: 10px;
+    font-weight: 100;
+}
+
+.route-info i {
+    color: #999999;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.route-info .distance {
+    margin-right: 10px;
+}
+
+.dashboard {
+    overflow: auto;
+    width: 80%;
+    background-color: #ecf0f1;
+    color: #7f8c8d;
+    padding: 10px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.dashboard .distance {
+    float: left;
+    width: 50%;
+}
+
+.dashboard .value {
+    font-weight: 300;
+    font-size: 2rem;
+}
+
+.dashboard .unit {
+    font-weight: 300;
+    font-size: .6rem;
+    text-transform: uppercase;
+}
+
+.dashboard .duration {
+    float: right;
+    width: 50%;
+}
+
+.duration li {
+    display: inline-block;
+    margin-right: 5px;
+}
+
+.route-control {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.route-control a {
+    text-decoration: none;
+    color: #666666;
+    font-size: 1.2rem;
+}
+
+.route-control .remove-route {
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.route-tabs {
+    position: absolute;
+    width: 50px;
+    right: 345px;
+    top: 100px;
+    z-index: 20;
+    text-align: center;
+    font-size: 1rem;
+}
+
+.route-tabs li {
+    background-color: #eeeeee;
+    margin: 5px 0;
+    padding: 10px 0;
+    border:1px solid #aaaaaa;
+    border-radius: 5px 0 0 5px;
+}
+
+.route-tabs li:hover, .route-tabs li.active {
+    background: #f39c12; /* Old browsers */
+    background: -moz-linear-gradient(left,  #f39c12 0%, #ffffff 73%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, right top, color-stop(0%,#f39c12), color-stop(73%,#ffffff)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(left,  #f39c12 0%,#ffffff 73%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(left,  #f39c12 0%,#ffffff 73%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(left,  #f39c12 0%,#ffffff 73%); /* IE10+ */
+    background: linear-gradient(to right,  #f39c12 0%,#ffffff 73%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f39c12', endColorstr='#ffffff',GradientType=1 ); /* IE6-9 */
+    cursor: pointer;
+    border:1px solid #f39c12;
+    border-right: none;
+}
+
+.route-tabs a {
+    text-decoration: none;
+    color: #666666;
+}
+
+.edit-route-name input[type='text'] {
+    border: none;
+    font-size: 1rem;
+    outline: none;
+    padding-right: 50px;
+    width: 100%;
+    border-bottom: 1px solid;
+}
+
+// rtl .navbar-form {
+//   margin-left: 10px;
+
+
+// .topnav-navbar ul.pull-right.navbar-nav {
+//   margin-right: 0;
