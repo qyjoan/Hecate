@@ -5,6 +5,7 @@ var ReactDOM = require('react-dom');
 var Button = require('react-bootstrap').Button;
 var ButtonInput = require('react-bootstrap').ButtonInput;
 var Well = require('react-bootstrap').Well;
+var Table = require('react-bootstrap').Table;
 import { Form, ValidatedInput } from 'react-bootstrap-validation';
 
 var InputError = React.createClass({
@@ -430,139 +431,48 @@ var Results = React.createClass({
 
     getIconUrl: function (icon) {
         //icon .pngs placed in github io repo
-        console.log("../../../../common/images/" + icon + ".png")
         return "../../../../common/images/" + icon + ".png";
     },
     render: function () {
         var outbound = this.props.outbound_data;
-        var html = ""
-
-        if ('Monday' in outbound) {
-            var day = outbound['Monday']
-            var w = day['weather']
-            var weather = w['start_address']
-            var temp = weather['temperature']
-            var celcius = temp['celcius']
-            var max_temp = celcius['max']
-            var min_temp = celcius['min']
-            html += "<tr>"
-            html += "<td>Monday</td>"
-            html += "<td>" + weather['weather'] + " - " + min_temp + " to " + max_temp + " degrees.</td>"
-            html += "<td>" + day['optimal_time'] + "</td>"
-            html += "<td>" + day['optimal_duration'] + "</td>"
-            html += "</tr>"
-        }
-
-        if ('Tuesday' in outbound) {
-            var day = outbound['Tuesday']
-            var w = day['weather']
-            var weather = w['start_address']
-            var temp = weather['temperature']
-            var celcius = temp['celcius']
-            var max_temp = celcius['max']
-            var min_temp = celcius['min']
-            html += "<tr>"
-            html += "<td>Tuesday</td>"
-            html += "<td>" + weather['weather'] + " - " + min_temp + " to " + max_temp + " degrees.</td>"
-            html += "<td>" + day['optimal_time'] + "</td>"
-            html += "<td>" + day['optimal_duration'] + "</td>"
-            html += "</tr>"
-        }
-
-        if ('Wednesday' in outbound) {
-            var day = outbound['Wednesday']
-            var w = day['weather']
-            var weather = w['start_address']
-            var temp = weather['temperature']
-            var celcius = temp['celcius']
-            var max_temp = celcius['max']
-            var min_temp = celcius['min']
-            html += "<tr>"
-            html += "<td>Wednesday</td>"
-            html += "<td>" + weather['weather'] + " - " + min_temp + " to " + max_temp + " degrees.</td>"
-            html += "<td>" + day['optimal_time'] + "</td>"
-            html += "<td>" + day['optimal_duration'] + "</td>"
-            html += "</tr>"
-        }
-
-        if ('Thursday' in outbound) {
-            var day = outbound['Thursday']
-            var w = day['weather']
-            var weather = w['start_address']
-            var temp = weather['temperature']
-            var celcius = temp['celcius']
-            var max_temp = celcius['max']
-            var min_temp = celcius['min']
-            html += "<tr>"
-            html += "<td>Thursday</td>"
-            html += "<td>" + weather['weather'] + " - " + min_temp + " to " + max_temp + " degrees.</td>"
-            html += "<td>" + day['optimal_time'] + "</td>"
-            html += "<td>" + day['optimal_duration'] + "</td>"
-            html += "</tr>"
-        }
-
-        if ('Friday' in outbound) {
-            var day = outbound['Friday']
-            var w = day['weather']
-            var weather = w['start_address']
-            var temp = weather['temperature']
-            var celcius = temp['celcius']
-            var max_temp = celcius['max']
-            var min_temp = celcius['min']
-            html += "<tr>"
-            html += "<td>Friday</td>"
-            html += "<td>" + weather['weather'] + " - " + min_temp + " to " + max_temp + " degrees.</td>"
-            html += "<td>" + day['optimal_time'] + "</td>"
-            html += "<td>" + day['optimal_duration'] + "</td>"
-            html += "</tr>"
-        }
-
-        if ('Saturday' in outbound) {
-            var day = outbound['Saturday']
-            var w = day['weather']
-            var weather = w['start_address']
-            var temp = weather['temperature']
-            var celcius = temp['celcius']
-            var max_temp = celcius['max']
-            var min_temp = celcius['min']
-            html += "<tr>"
-            html += "<td>Saturday</td>"
-            html += "<td>" + weather['weather'] + " - " + min_temp + " to " + max_temp + " degrees.</td>"
-            html += "<td>" + day['optimal_time'] + "</td>"
-            html += "<td>" + day['optimal_duration'] + "</td>"
-            html += "</tr>"
-        }
-
-        if ('Sunday' in outbound) {
-            var day = outbound['Sunday']
-            var w = day['weather']
-            var weather = w['start_address']
-            var temp = weather['temperature']
-            var celcius = temp['celcius']
-            var max_temp = celcius['max']
-            var min_temp = celcius['min']
-            html += "<tr>"
-            html += "<td>Sunday</td>"
-            html += "<td>" + weather['weather'] + " - " + min_temp + " to " + max_temp + " degrees.</td>"
-            html += "<td>" + day['optimal_time'] + "</td>"
-            html += "<td>" + day['optimal_duration'] + "</td>"
-            html += "</tr>"
-        }
+        var rows = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(function (day) {
+            if (day in outbound) {
+                var dayData = outbound[day];
+                var w = dayData['weather'];
+                var weather = w['start_address'];
+                var temp = weather['temperature'];
+                var celcius = temp['celcius'];
+                var max_temp = celcius['max'];
+                var min_temp = celcius['min'];
+                return (
+                    <tr>
+                        <td>{day}</td>
+                        <td>{weather['weather'] + " - " + min_temp + " to " + max_temp + " degrees."}</td>
+                        <td>{dayData['optimal_time']}</td>
+                        <td>{dayData['optimal_duration']}</td>
+                    </tr>
+                );
+            }
+        }).filter(function (e) {return e});
 
         return (
 
             <Well>
                 <p>Outbound Data:</p>
 
-                <table>
+                <Table striped bordered condensed hover>
                     <thead>
-                    <td>Day</td>
-                    <td>Weather</td>
-                    <td>Optimal Departure Time</td>
-                    <td>Duration</td>
+                        <tr>
+                            <td>Day</td>
+                            <td>Weather</td>
+                            <td>Optimal Departure Time</td>
+                            <td>Duration</td>
+                        </tr>
                     </thead>
-                    <tbody dangerouslySetInnerHTML={{__html: html}} />
-                    </table>
+                    <tbody>
+                        {rows}
+                    </tbody>
+                </Table>
 
                 <p>Is this a commute? Would you like us to monitor this route for you?</p>
             </Well>
