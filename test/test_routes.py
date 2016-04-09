@@ -15,7 +15,7 @@ stats = db.Stats
 # returns a dataframe
 def get_route(username, route_type, defense):
     runs = []
-    if routes.find({'username': username, 'route_type': route_type}).count() == 0:
+    if routes.find({'username': username, 'route_type': route_type,'live': False}).count() == 0:
         return
     for route in routes.find({'username': username,'route_type': route_type}):
         if route['legs'][0].has_key('duration_in_traffic'):
@@ -25,7 +25,6 @@ def get_route(username, route_type, defense):
             departure_time = route['departure_time']
             travel_mode = route['travel_mode']
             created_date = datetime.strptime(route['created_date'], "%c").date()
-        #if not (defense == False and str(departure_time).split(' ')[1][0] == '0' and route_type == 'homebound'):
             runs.append({'departure_day':departure_day,
                      'departure_time':departure_time,
                      'duration':duration,

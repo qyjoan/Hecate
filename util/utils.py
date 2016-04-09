@@ -12,14 +12,28 @@ now = datetime.today()
 
 def get_days(username):
     user = users.find_one({'username': username})
-    for d in user['route']['days']:
-        print d
+    #for d in user['route']['days']:
+    #    print d
+    return user['route']['days']
 
 def get_last_load(username):
     return max([datetime.strptime(x['created_date'], "%c") for x in routes.find({"username": username, "live": False})])
 
+def timeDiff(t1, t2):
+    time1 = datetime.strptime(t1, "%H:%M")
+    time2 = datetime.strptime(t2, "%H:%M")
+    newTime = max(time1, time2) - min(time1, time2)
+    return newTime.seconds
+
 def get_min_diff(current_time, times):
-    return 0
+    ix = 0
+    min_diff = float('inf')
+    for i in range(len(times)):
+        diff = timeDiff(current_time, times[i])
+        if diff < min_diff:
+            min_diff = diff
+            ix = i
+    return ix
 
 def get_one_route(rid):
     r = routes.find_one({'_id': rid})
@@ -81,3 +95,22 @@ def get_day_date_pair(df):
 # get user from User table
 def get_user(username):
     return users.find_one({"username": username})
+
+# s is an object from sStats
+def get_weather(s):
+    weathers = []
+    username = s['username']
+    for route_type in ['outbound', 'homebound']:
+        for day in s[route_type]:
+            weather = None
+            try:
+                weather = s[route_type][day]['route']['weather']['start_address']['weather']
+            except:
+                if 'route' in s[route_type][day]:
+                    time = s[route_type][day]['route']['departure_time']
+                    print "{} weather does not exist for {} on {} for {}".format(route_type, username, day, time)
+                else:
+                    print "no route for {} for {} on {}".format(username, route_type, day)
+            if weather is not None:
+                weathers.append(weather)
+    return weathers

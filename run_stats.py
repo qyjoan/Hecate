@@ -104,7 +104,7 @@ def main(username, no_update=True):
     #print_updates(update_filled)
     if update != {}:
         new_user = update_user(rec, update)
-    #    print_user_updates(rec.user, new_user)
+        #print_user_updates(rec.user, new_user)
     if not no_update:
         print "Updating User table for {}".format(username)
         users.find_one_and_replace({'username':username}, new_user, upsert=False)
@@ -112,7 +112,7 @@ def main(username, no_update=True):
         #users.insert_one(new_user)
         print "Inserting new record into Stats table for {}".format(username)
         #update['testing'] = True
-        stats.insert_one(update)
+        stats.insert_one(update_filled)
 
 if __name__=="__main__":
     args = sys.argv[1].split(',')

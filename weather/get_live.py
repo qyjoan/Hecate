@@ -11,8 +11,15 @@ class WeatherInfluence(object):
     def __init__(self, username):
         self.username = username
 
-    def _GetLiveData(self):
-        return [r for r in routes.find({"live": True, "username": self.username})]
+    def _GetLiveData(self, username):
+        if username == "all":
+            l = [r for r in routes.find({"live": True})]
+            print "{} live routes found in total.".format(len(l))
+            return l
+        else:
+            l = [r for r in routes.find({"live": True, "username": username})]
+            print "{} live routes found for {}.".format(len(l), username)
+            return l
 
     def _ExtractFieldsFromRoute(self, fields, route):
         result = {}
@@ -30,7 +37,7 @@ class WeatherInfluence(object):
         return result
 
     def GenerateLiveDataFrame(self):
-        live_data = self._GetLiveData()
+        live_data = self._GetLiveData(self.username)
         df_columns = {'end_address_weather':'weather.end_address.weather',
                       'start_address_weather':'weather.start_address.weather',
                       'route_type': 'route_type',

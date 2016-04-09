@@ -109,7 +109,7 @@ class Recommendation:
                 result[day]['departure_time'] = optimal_times[day][0][0][:5]
                 result[day]['duration_sec'] = optimal_times[day][0][2]
             else:
-                ix = utils.get_min_diff(self.current_departure_times[route_type][day], optimal_times[day])
+                ix = utils.get_min_diff(self.current_departure_times[route_type][day], [x[0] for x in optimal_times[day]])
                 result[day]['id'] = optimal_times[day][ix][1]
                 result[day]['departure_time'] = optimal_times[day][ix][0][:5]
                 result[day]['duration_sec'] = optimal_times[day][ix][2]
