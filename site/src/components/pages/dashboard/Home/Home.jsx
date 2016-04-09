@@ -243,9 +243,18 @@ var Home = React.createClass({
                 var sub = 'Outbound'
             }
 
+            var t_saved = null
+            console.log(parseFloat(user_data['total_saved_minutes']).toFixed(2))
+            if (parseFloat(user_data['total_saved_minutes']).toFixed(2) < 1.0) {
+                t_saved = '< 1 Min Saved'
+            }
+            else {
+                t_saved = parseFloat(user_data['total_saved_minutes']).toFixed(2) + ' Mins Saved'
+            }
+
             // TODO: SET ALL THE USER PARAMETERS HERE
             this.setState({
-                total_saved: parseFloat(user_data['total_saved_minutes']).toFixed(2) + ' Mins Saved',
+                total_saved: t_saved,
                 since_date: 'Since: ' + new Date(Date.parse(user_data['since'])).toDateString(),
                 yearly_saved: user_data['yearly_projected'] + ' Hours',
                 today_outbound: user_data['today_outbound_departure'] + ' Departure',

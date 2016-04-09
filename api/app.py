@@ -356,6 +356,10 @@ def get_stats():
             total_saved_seconds = 0
             hours_per_year = 0  # Hours saved per week x 48 weeks.
             total_days = 0
+            today_outbound_departure = 'No'
+            today_outbound_time_saved = 0
+            today_homebound_departure = 'No'
+            today_homebound_time_saved = 0
 
             first_week = False
             for stat in stats:
@@ -379,6 +383,16 @@ def get_stats():
                     else:
                         ts_out[day] = d['time_saved']
 
+                wday = datetime.today() + timedelta(days=1)
+                day_check = calendar.day_name[wday.weekday()]
+                if today_outbound_departure == None:
+                    for day in days:
+                        d = {}
+                        d = days[day]
+                        if day == day_check:
+                            today_outbound_departure = d['suggested_departure']
+                            today_outbound_time_saved = d['time_saved']
+
                 days = {}
                 ts_home = total_saved['homebound']
                 days = stat['homebound']
@@ -395,6 +409,7 @@ def get_stats():
                         ts_home[day] += d['time_saved']
                     else:
                         ts_home[day] = d['time_saved']
+
 
             if total_days > 0:
                 hours_per_year = ((total_saved_seconds / 60.0) / 60.0) * 336.0 / total_days
@@ -475,11 +490,14 @@ def get_recommendations():
                         r['date'] = next_weekday(stat['updated_at'], day_numbers[day])
                         r['suggested_departure'] = d['suggested_departure']
                         r['route_type'] = 'Outbound'
-                        r['time_saved'] = d['time_saved']
+                        if d['time_saved'] / 60.0 < 1.0:
+                            r['time_saved'] = '<1 minute!'
+                        else:
+                            r['time_saved'] = str(d['time_saved'] / 60) + ' minutes!'
                         r['updated_date'] = str(stat['updated_at'])
 
-                        recommendation += '<li><a href="">New Recommendation: %s. Possible time saving of %s minutes!</a> <span className="feed-date">%s</span><br/><br/></li>' % (
-                        day, d['time_saved'], stat['updated_at'].date())
+                        recommendation += '<li><a href="">New Recommendation: %s. Possible time saving of %s</a> <span className="feed-date">%s</span><br/><br/></li>' % (
+                        day, r['time_saved'], stat['updated_at'].date())
 
                 days = {}
                 days = stat['homebound']
@@ -491,11 +509,14 @@ def get_recommendations():
                         r['date'] = next_weekday(stat['updated_at'], day_numbers[day])
                         r['suggested_departure'] = d['suggested_departure']
                         r['route_type'] = 'Outbound'
-                        r['time_saved'] = d['time_saved']
+                        if (d['time_saved'] / 60.0) < 1.0:
+                            r['time_saved'] = '<1 minute!'
+                        else:
+                            r['time_saved'] = str(d['time_saved'] / 60) + ' minutes!'
                         r['updated_date'] = str(stat['updated_at'])
 
-                        recommendation += '<li><a href="">New Recommendation: %s. Possible time saving of %s minutes!</a> <span className="feed-date">%s</span><br/><br/></li>' % (
-                        day, d['time_saved'], stat['updated_at'].date())
+                        recommendation += '<li><a href="">New Recommendation: %s. Possible time saving of %s</a> <span className="feed-date">%s</span><br/><br/></li>' % (
+                        day, r['time_saved'], stat['updated_at'].date())
 
             return json.dumps(recommendation), 200, {'ContentType': 'application/json'}
         else:

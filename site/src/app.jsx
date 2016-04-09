@@ -1,4 +1,4 @@
-  import React from 'react';
+import React from 'react';
 import { render } from 'react-dom';
 import { createHistory, useBasename } from 'history';
 import { Router, Route, IndexRoute } from 'react-router';
@@ -31,8 +31,8 @@ window.addEventListener('hashchange', handleHashChange, false);
 
 const rootRoute = {
   path: '/',
-  component: require('./components/layouts/Base'),
   childRoutes: [ {
+      component: require('./components/layouts/Base'),
       component: require('./components/layouts/Dashboard'),
       indexRoute: {
         component: require('./components/pages/dashboard/Home/Home')
