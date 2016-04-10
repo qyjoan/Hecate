@@ -6,6 +6,7 @@ import C3Chart from "../../../common/ChartElement/C3Chart";
 import CurrentRoute from '../../../common/CurrentRoute';
 import MapRoute from '../../../common/GoogleMaps';
 import Stats from '../../../common/Stats';
+import Weekly from '../../../common/Weekly';
 import vectorMap from '../../../common/jquery-jvectormap-2.0.3/jquery-jvectormap-2.0.3.min';
 import code from '../../../common/jquery-jvectormap-2.0.3/jquery-jvectormap-world-mill-en';
 import AppStore from '../../../../stores/AppStore';
@@ -15,170 +16,10 @@ import {History} from 'history';
 var GoogleMaps = require('google-maps'),
     ReactDOM = require('react-dom');
 
-let data = [
-    {
-        key: "Referral user",
-        values: [
-            {label: "0", value: 2},
-            {label: "1", value: 13},
-            {label: "2", value: 27},
-            {label: "3", value: 16},
-            {label: "4", value: 17},
-            {label: "5", value: 15},
-            {label: "6", value: 58}
-        ]
-    },
-    {
-        key: "Returning user",
-        values: [
-            {label: "0", value: 6},
-            {label: "1", value: 17},
-            {label: "2", value: 36},
-            {label: "3", value: 12},
-            {label: "4", value: 36},
-            {label: "5", value: 27},
-            {label: "6", value: 40}
-        ]
-    },
-    {
-        key: "New user",
-        values: [
-            {label: "0", value: 10},
-            {label: "1", value: 19},
-            {label: "2", value: 29},
-            {label: "3", value: 11},
-            {label: "4", value: 30},
-            {label: "5", value: 22},
-            {label: "6", value: 28}
-        ]
-    }
-];
-
-let options = {
-    padding: {
-        top: 50,
-        bottom: 20,
-        left: 0,
-        right: 10
-    },
-    size: {
-        height: 255
-    },
-    subchart: false,
-    grid: {
-        x: false,
-        y: false
-    },
-    labels: false,
-    axisLabel: {
-        x: "",
-        y: ""
-    },
-    showAxisLabel: false,
-    onClick: function (d) {
-        let categories = this.categories(); //c3 function, get categorical labels
-        console.log(d);
-        console.log("you clicked {" + d.name + ": " + categories[d.x] + ": " + d.value + "}");
-    }
-};
-
-let data1 = [
-    {
-        key: "",
-        values: [
-            {label: "0", value: 33},
-            {label: "1", value: 27},
-            {label: "2", value: 36},
-            {label: "3", value: 47},
-            {label: "4", value: 55},
-            {label: "5", value: 37},
-            {label: "6", value: 32},
-            {label: "7", value: 39},
-            {label: "8", value: 28},
-            {label: "9", value: 21},
-            {label: "10", value: 37},
-            {label: "11", value: 42},
-            {label: "12", value: 32},
-            {label: "13", value: 26},
-            {label: "14", value: 18}
-        ]
-    }
-];
-
-let options1 = {
-    padding: {
-        top: 0,
-        bottom: 0,
-        left: 0,
-        right: 0
-    },
-    size: {
-        height: 149
-    },
-    subchart: false,
-    grid: {
-        x: false,
-        y: false
-    },
-    labels: false,
-    axisLabel: {
-        x: "",
-        y: ""
-    },
-    showLegend: false,
-    showAxisLabel: false,
-    color: '#de5b57',
-    onClick: function (d) {
-        let categories = this.categories(); //c3 function, get categorical labels
-        console.log(d);
-        console.log("you clicked {" + d.name + ": " + categories[d.x] + ": " + d.value + "}");
-    }
-};
-
-let data2 = [
-    {
-        key: "",
-        values: [
-            {label: "0", value: 33},
-            {label: "1", value: 15},
-            {label: "2", value: 10}
-        ]
-    }
-];
-
-let options2 = {
-    padding: {
-        top: 0,
-        bottom: 0,
-        left: 0,
-        right: 0
-    },
-    size: {
-        height: 130
-    },
-    subchart: false,
-    grid: {
-        x: false,
-        y: false
-    },
-    labels: false,
-    axisLabel: {
-        x: "",
-        y: ""
-    },
-    showLegend: false,
-    showAxisLabel: false,
-    onClick: function (d) {
-        let categories = this.categories(); //c3 function, get categorical labels
-        console.log(d);
-        console.log("you clicked {" + d.name + ": " + categories[d.x] + ": " + d.value + "}");
-    }
-};
-
 var Home = React.createClass({
         mixins: [History],
 
-        componentWillMount: function() {
+        componentWillMount: function () {
             var username = sessionStorage.getItem('username');
 
             if (!username) {
@@ -236,6 +77,7 @@ var Home = React.createClass({
 
         handleStatsSubmitSuccess: function (data) {
             var user_data = JSON.parse(data);
+            console.log(user_data)
             if (user_data['today_outbound_time_saved'] > 0) {
                 var sub = 'Outbound (Save ' + user_data['today_outbound_time_saved'] + ' mins)'
             }
@@ -243,13 +85,23 @@ var Home = React.createClass({
                 var sub = 'Outbound'
             }
 
+            var t_saved = null
+            console.log(parseFloat(user_data['total_saved_minutes']).toFixed(2))
+            if (parseFloat(user_data['total_saved_minutes']).toFixed(2) < 1.0) {
+                t_saved = '< 1 Min Saved'
+            }
+            else {
+                t_saved = parseFloat(user_data['total_saved_minutes']).toFixed(2) + ' Mins Saved'
+            }
+
             // TODO: SET ALL THE USER PARAMETERS HERE
             this.setState({
-                total_saved: parseFloat(user_data['total_saved_minutes']).toFixed(2) + ' Mins Saved',
+                total_saved: t_saved,
                 since_date: 'Since: ' + new Date(Date.parse(user_data['since'])).toDateString(),
                 yearly_saved: user_data['yearly_projected'] + ' Hours',
                 today_outbound: user_data['today_outbound_departure'] + ' Departure',
-                today_outbound_sub: sub
+                today_outbound_sub: sub,
+                outbound: user_data['outbound']
             })
         },
 
@@ -261,7 +113,8 @@ var Home = React.createClass({
 
             return {
                 user: {},
-                username: null
+                username: null,
+                outbound: {}
             };
 
         },
@@ -292,6 +145,139 @@ var Home = React.createClass({
 
             this.loadUserFromServer();
             AppStore.addChangeListener(this._onChange);
+        },
+
+        getDaysHTML: function () {
+            var outbound = this.state.outbound;
+            var html = ""
+
+            if ('Monday' in outbound) {
+                var day = outbound['Monday']
+                var max_temp = day['max_temp']
+                var min_temp = day['min_temp']
+                html += "<tr>"
+                html += "<td width='15%'>Monday</td>"
+                html += "<td width='40%'>" +
+                    "<table width='100%'><tbody><tr>" +
+                    "<td align='center'><img src='" + require("../../../../common/images/" + day['weather'] + ".png") + "' width='50' height='50'></td>" +
+                    "<td><img src='" + require("../../../../common/images/min.png") + "' />" + min_temp +
+                    "<img src='" + require("../../../../common/images/max.png") + "' />" + max_temp + "</td></tr></tbody></table>" +
+                    "</td>"
+                html += "<td width='15%'>" + day['departure_time'] + "</td>"
+                html += "<td width='15%'>" + day['duration_weather'] + " mins</td>"
+                html += "<td width='15%'>" + day['est_arrival'] + "</td>"
+                html += "</tr>"
+            }
+
+            if ('Tuesday' in outbound) {
+                var day = outbound['Tuesday']
+                var max_temp = day['max_temp']
+                var min_temp = day['min_temp']
+                html += "<tr>"
+                html += "<td width='15%'>Tuesday</td>"
+                html += "<td width='40%'>" +
+                    "<table width='100%'><tbody><tr>" +
+                    "<td align='center'><img src='" + require("../../../../common/images/" + day['weather'] + ".png") + "' width='50' height='50'></td>" +
+                    "<td><img src='" + require("../../../../common/images/min.png") + "' />" + min_temp +
+                    "<img src='" + require("../../../../common/images/max.png") + "' />" + max_temp + "</td></tr></tbody></table>" +
+                    "</td>"
+                html += "<td width='15%'>" + day['departure_time'] + "</td>"
+                html += "<td width='15%'>" + day['duration_weather'] + " mins</td>"
+                html += "<td width='15%'>" + day['est_arrival'] + "</td>"
+                html += "</tr>"
+            }
+
+            if ('Wednesday' in outbound) {
+                var day = outbound['Wednesday']
+                var max_temp = day['max_temp']
+                var min_temp = day['min_temp']
+                html += "<tr>"
+                html += "<td width='15%'>Wednesday</td>"
+                html += "<td width='40%'>" +
+                    "<table width='100%'><tbody><tr>" +
+                    "<td align='center'><img src='" + require("../../../../common/images/" + day['weather'] + ".png") + "' width='50' height='50'></td>" +
+                    "<td><img src='" + require("../../../../common/images/min.png") + "' />" + min_temp +
+                    "<img src='" + require("../../../../common/images/max.png") + "' />" + max_temp + "</td></tr></tbody></table>" +
+                    "</td>"
+                html += "<td width='15%'>" + day['departure_time'] + "</td>"
+                html += "<td width='15%'>" + day['duration_weather'] + " mins</td>"
+                html += "<td width='15%'>" + day['est_arrival'] + "</td>"
+                html += "</tr>"
+            }
+
+            if ('Thursday' in outbound) {
+                var day = outbound['Thursday']
+                var max_temp = day['max_temp']
+                var min_temp = day['min_temp']
+                html += "<tr>"
+                html += "<td width='15%'>Thursday</td>"
+                html += "<td width='40%'>" +
+                    "<table width='100%'><tbody><tr>" +
+                    "<td align='center'><img src='" + require("../../../../common/images/" + day['weather'] + ".png") + "' width='50' height='50'></td>" +
+                    "<td><img src='" + require("../../../../common/images/min.png") + "' />" + min_temp +
+                    "<img src='" + require("../../../../common/images/max.png") + "' />" + max_temp + "</td></tr></tbody></table>" +
+                    "</td>"
+                html += "<td width='15%'>" + day['departure_time'] + "</td>"
+                html += "<td width='15%'>" + day['duration_weather'] + " mins</td>"
+                html += "<td width='15%'>" + day['est_arrival'] + "</td>"
+                html += "</tr>"
+            }
+
+            if ('Friday' in outbound) {
+                var day = outbound['Friday']
+                var max_temp = day['max_temp']
+                var min_temp = day['min_temp']
+                html += "<tr>"
+                html += "<td width='15%'>Friday</td>"
+                html += "<td width='40%'>" +
+                    "<table width='100%'><tbody><tr>" +
+                    "<td align='center'><img src='" + require("../../../../common/images/" + day['weather'] + ".png") + "' width='50' height='50'></td>" +
+                    "<td><img src='" + require("../../../../common/images/min.png") + "' />" + min_temp +
+                    "<img src='" + require("../../../../common/images/max.png") + "' />" + max_temp + "</td></tr></tbody></table>" +
+                    "</td>"
+                html += "<td width='15%'>" + day['departure_time'] + "</td>"
+                html += "<td width='15%'>" + day['duration_weather'] + " mins</td>"
+                html += "<td width='15%'>" + day['est_arrival'] + "</td>"
+                html += "</tr>"
+            }
+
+            if ('Saturday' in outbound) {
+                var day = outbound['Saturday']
+                var max_temp = day['max_temp']
+                var min_temp = day['min_temp']
+                html += "<tr>"
+                html += "<td width='15%'>Saturday</td>"
+                html += "<td width='40%'>" +
+                    "<table width='100%'><tbody><tr>" +
+                    "<td align='center'><img src='" + require("../../../../common/images/" + day['weather'] + ".png") + "' width='50' height='50'></td>" +
+                    "<td><img src='" + require("../../../../common/images/min.png") + "' />" + min_temp +
+                    "<img src='" + require("../../../../common/images/max.png") + "' />" + max_temp + "</td></tr></tbody></table>" +
+                    "</td>"
+                html += "<td width='15%'>" + day['departure_time'] + "</td>"
+                html += "<td width='15%'>" + day['duration_weather'] + " mins</td>"
+                html += "<td width='15%'>" + day['est_arrival'] + "</td>"
+                html += "</tr>"
+            }
+
+            if ('Sunday' in outbound) {
+                var day = outbound['Sunday']
+                var max_temp = day['max_temp']
+                var min_temp = day['min_temp']
+                html += "<tr>"
+                html += "<td width='15%'>Sunday</td>"
+                html += "<td width='40%'>" +
+                    "<table width='100%'><tbody><tr>" +
+                    "<td align='center'><img src='" + require("../../../../common/images/" + day['weather'] + ".png") + "' width='50' height='50'></td>" +
+                    "<td><img src='" + require("../../../../common/images/min.png") + "' />" + min_temp +
+                    "<img src='" + require("../../../../common/images/max.png") + "' />" + max_temp + "</td></tr></tbody></table>" +
+                    "</td>"
+                html += "<td width='15%'>" + day['departure_time'] + "</td>"
+                html += "<td width='15%'>" + day['duration_weather'] + " mins</td>"
+                html += "<td width='15%'>" + day['est_arrival'] + "</td>"
+                html += "</tr>"
+            }
+
+            return (html)
         },
 
         render: function () {
@@ -328,50 +314,9 @@ var Home = React.createClass({
                                     </Stats>
                                 </div>
                             </div>
-                            <div className="col-md-4 col-lg-6">
-                                <div className="home-charts-middle">
-                                    <div className="chart-container">
-                                        <div className="chart-comment clearfix">
-                                            <div className="text-primary pull-left">
-                                                <span className="comment-header">55%</span><br />
-                                                <span className="comment-comment">{Translate.getWord('chart1')}</span>
-                                            </div>
-                                            <div className="text-warning pull-left m-l">
-                                                <span className="comment-header">25%</span><br />
-                                                <span className="comment-comment">{Translate.getWord('chart2')}</span>
-                                            </div>
-                                            <div className="text-success pull-left m-l">
-                                                <span className="comment-header">20%</span><br />
-                                                <span className="comment-comment">{Translate.getWord('chart3')}</span>
-                                            </div>
-                                        </div>
-                                        <div bindto-id="line-chart">
-                                            <C3Chart data={data} type={"lineBar"} options={options} value={1}/>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="col-md-4 col-lg-3">
-                                <div className="home-charts-right">
-                                    <div className="top-right-chart">
-                                        <C3Chart data={data1} type={"bar"} options={options1} value={2}/>
-                                    </div>
-                                    <div className="bottom-right-chart">
-                                        <div className="top-left-chart clearfix">
-                                            <div className="row">
-                                                <div className="col-sm-6 text-left">
-                                                    <div className="padder">
-                                                        <span
-                                                            className="heading">{Translate.getWord('views')}: </span><br />
-                                                        <big className="text-primary">22068</big>
-                                                    </div>
-                                                </div>
-                                                <div className="col-sm-6">
-                                                    <C3Chart data={data2} type={"pie"} options={options2} value={3}/>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                            <div className="col-md-8 col-lg-9">
+                                <div className="home-stats">
+                                    <Weekly type="Outbound - This Week" html={this.getDaysHTML()} />
                                 </div>
                             </div>
                         </div>
@@ -392,12 +337,12 @@ var Home = React.createClass({
             );
         }
         ,
-  _onChange: function() {
+        _onChange: function () {
 
-      this.setState({
-          language: AppStore.getLanguage()
-      })
-  }
+            this.setState({
+                language: AppStore.getLanguage()
+            })
+        }
     })
     ;
 
