@@ -96,7 +96,6 @@ var Route = React.createClass({
         },
 
         handleChange: function (e) {
-            console.log(e)
             var options = e.target.options;
             var value = [];
             for (var i = 0, l = options.length; i < l; i++) {

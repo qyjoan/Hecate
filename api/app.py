@@ -3,6 +3,7 @@ from flask import Flask, jsonify, request
 from flask.ext.sentinel import ResourceOwnerPasswordCredentials, oauth
 from flask import make_response, request, current_app
 from functools import update_wrapper
+import math
 
 import json
 import sys
@@ -216,6 +217,32 @@ def create_user():
 
     return response
 
+# Function: getGeneralisedWeatherFactor
+# Parameters:
+#   - inWeather: string
+#                The type of weather the generalised weather factor is for
+#                Valid options are: Rain, Snow, Clear, Cloud
+def getGeneralisedWeatherFactor(inWeather):
+
+    if inWeather not in ('Rain', 'Snow', 'Clear', 'Cloud'):
+        return 'Error: Invalid Weather Type provided'
+
+    weather_data = None
+
+    # Connect to MongoDB
+    client = MongoClient()
+
+    db = client.Hecate
+    collection = db.weather
+
+    weather_data = collection.find_one({'weather': inWeather})
+
+    # If there is no multiplying factor for weather, return 0
+    if weather_data == None:
+        return 0
+    else:
+        return weather_data['weather_impact']
+
 def buildJSON(data):
     day = {}
 
@@ -241,6 +268,13 @@ def buildJSON(data):
         duration = legs['duration_in_traffic']
         i['duration_in_traffic'] = duration
         i['duration_in_traffic_value'] = duration['value']
+        route_weather = {}
+        route_weather = route['weather']
+        weather = route_weather['start_address']
+        weather_impact = getGeneralisedWeatherFactor(weather['weather'])
+        i['weather_impact'] = weather_impact
+        i['duration_in_traffic_weather_value'] = duration['value'] + (duration['value'] * weather_impact)
+        i['duration_in_traffic_weather_text'] = str(int(duration['value'] + (duration['value'] * weather_impact))/60) + ' mins'
         i['departure_time_of_day'] = route['departure_time_of_day']
         i['departure_day'] = route['departure_day']
         i['fastest'] = False
@@ -258,11 +292,11 @@ def buildJSON(data):
 
         idx = 0
         for item in l:
-            if item['duration_in_traffic_value'] < current_fastest:
+            if item['duration_in_traffic_weather_value'] < current_fastest:
                 fastest_tod = item['departure_time_of_day']
-                duration = item['duration_in_traffic']
-                fastest_duration = duration['text']
-                current_fastest = item['duration_in_traffic_value']
+                fastest_duration = item['duration_in_traffic_weather_text']
+
+                current_fastest = item['duration_in_traffic_weather_value']
                 fastest_index = idx
             idx += 1
 
@@ -369,6 +403,8 @@ def get_stats():
                 days = {}
                 ts_out = total_saved['outbound']
                 days = stat['outbound']
+                outbound = {}
+
                 for day in days:
                     d = {}
                     d = days[day]
@@ -382,6 +418,40 @@ def get_stats():
                         ts_out[day] += d['time_saved']
                     else:
                         ts_out[day] = d['time_saved']
+
+                    o = {}
+                    if 'route' in d:
+                        route = d['route']
+                        if 'weather' in route:
+                            weather = route['weather']
+                            if 'start_address' in weather:
+                                w = weather['start_address']
+                                temp = w['temperature']
+                                far = temp['fahrenheit']
+                                o['weather'] = w['weather']
+                                o['min_temp'] = far['min']
+                                o['max_temp'] = far['max']
+                            else:
+                                o['weather'] = 'Clear'
+                                o['min_temp'] = 0
+                                o['max_temp'] = 0
+                        else:
+                            o['weather'] = 'Clear'
+                            o['min_temp'] = 0
+                            o['max_temp'] = 0
+                    else:
+                        o['weather'] = 'Clear'
+                        o['min_temp'] = 0
+                        o['max_temp'] = 0
+                    o['departure_time']= d['suggested_departure']
+                    dt=datetime.strptime(d['suggested_departure'],"%H:%M")
+                    arrival = dt + timedelta(minutes=int((d['suggested_duration'] + d['weather_impact'] ) / 60.0))
+                    o['est_arrival'] = str(datetime.strftime(arrival,"%H:%M"))
+                    o['duration']= int(d['suggested_duration'] / 60.0)
+                    o['weather_impact'] = float("{0:.2f}".format(d['weather_impact'] / 60.0))
+                    o['duration_weather'] =  int((d['suggested_duration'] + d['weather_impact'] ) / 60.0)
+
+                    outbound[day] = o
 
                 wday = datetime.today() + timedelta(days=1)
                 day_check = calendar.day_name[wday.weekday()]
@@ -410,7 +480,6 @@ def get_stats():
                     else:
                         ts_home[day] = d['time_saved']
 
-
             if total_days > 0:
                 hours_per_year = ((total_saved_seconds / 60.0) / 60.0) * 336.0 / total_days
 
@@ -423,6 +492,7 @@ def get_stats():
                                'today_outbound_time_saved': today_outbound_time_saved / 60.0,
                                'today_homebound_departure': today_homebound_departure,
                                'today_homebound_time_saved': today_homebound_time_saved / 60.0,
+                               'outbound' : outbound
                                }), 200, {'ContentType': 'application/json'}
         else:
             print 'Stats not found'
@@ -432,7 +502,6 @@ def get_stats():
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         print(exc_type, fname, exc_tb.tb_lineno)
-
 
 @crossdomain(origin='*')
 def next_weekday(d, weekday):
