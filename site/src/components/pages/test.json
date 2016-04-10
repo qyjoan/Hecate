@@ -1,0 +1,242 @@
+{
+  "Tuesday": {
+    "start_address": "Menai",
+    "end_address": "Hurstville",
+    "weather": {
+      "start_address": {
+        "weather": "Clear",
+        "temperature": {
+          "fahrenheit": {
+            "min": 62.44,
+            "max": 77.25,
+            "eve": 77.25,
+            "morn": 62.71,
+            "night": 72.03,
+            "day": 71.65
+          },
+          "celcius": {
+            "min": 16.91,
+            "max": 25.14,
+            "eve": 25.14,
+            "morn": 17.06,
+            "night": 22.24,
+            "day": 22.03
+          }
+        }
+      },
+      "end_address": {
+        "weather": "Clear",
+        "temperature": {
+          "fahrenheit": {
+            "min": 62.44,
+            "max": 77.25,
+            "eve": 77.25,
+            "morn": 62.71,
+            "night": 72.03,
+            "day": 71.65
+          },
+          "celcius": {
+            "min": 16.91,
+            "max": 25.14,
+            "eve": 25.14,
+            "morn": 17.06,
+            "night": 22.24,
+            "day": 22.03
+          }
+        }
+      }
+    },
+    "routes": [
+      {
+        "departure_time_of_day": "07:00AM",
+        "duration_in_traffic": {
+          "text": "21 mins",
+          "value": 1246
+        },
+        "fastest": false,
+        "departure_day": "Tuesday",
+        "duration_in_traffic_value": 1246
+      },
+      {
+        "departure_time_of_day": "07:10AM",
+        "duration_in_traffic": {
+          "text": "21 mins",
+          "value": 1244
+        },
+        "fastest": false,
+        "departure_day": "Tuesday",
+        "duration_in_traffic_value": 1244
+      },
+      {
+        "departure_time_of_day": "07:20AM",
+        "duration_in_traffic": {
+          "text": "21 mins",
+          "value": 1242
+        },
+        "fastest": false,
+        "departure_day": "Tuesday",
+        "duration_in_traffic_value": 1242
+      },
+      {
+        "departure_time_of_day": "07:30AM",
+        "duration_in_traffic": {
+          "text": "21 mins",
+          "value": 1234
+        },
+        "fastest": false,
+        "departure_day": "Tuesday",
+        "duration_in_traffic_value": 1234
+      },
+      {
+        "departure_time_of_day": "07:40AM",
+        "duration_in_traffic": {
+          "text": "21 mins",
+          "value": 1230
+        },
+        "fastest": false,
+        "departure_day": "Tuesday",
+        "duration_in_traffic_value": 1230
+      },
+      {
+        "departure_time_of_day": "07:50AM",
+        "duration_in_traffic": {
+          "text": "20 mins",
+          "value": 1229
+        },
+        "fastest": false,
+        "departure_day": "Tuesday",
+        "duration_in_traffic_value": 1229
+      },
+      {
+        "departure_time_of_day": "08:00AM",
+        "duration_in_traffic": {
+          "text": "20 mins",
+          "value": 1222
+        },
+        "fastest": true,
+        "departure_day": "Tuesday",
+        "duration_in_traffic_value": 1222
+      }
+    ]
+  },
+  "Monday": {
+    "start_address": "Menai",
+    "end_address": "Hurstville",
+    "weather": {
+      "start_address": {
+        "weather": "Rain",
+        "temperature": {
+          "fahrenheit": {
+            "min": 63.5,
+            "max": 70.54,
+            "eve": 70.11,
+            "morn": 64.38,
+            "night": 66.58,
+            "day": 64.45
+          },
+          "celcius": {
+            "min": 17.5,
+            "max": 21.41,
+            "eve": 21.17,
+            "morn": 17.99,
+            "night": 19.21,
+            "day": 18.03
+          }
+        }
+      },
+      "end_address": {
+        "weather": "Rain",
+        "temperature": {
+          "fahrenheit": {
+            "min": 63.5,
+            "max": 70.54,
+            "eve": 70.11,
+            "morn": 64.38,
+            "night": 66.58,
+            "day": 64.45
+          },
+          "celcius": {
+            "min": 17.5,
+            "max": 21.41,
+            "eve": 21.17,
+            "morn": 17.99,
+            "night": 19.21,
+            "day": 18.03
+          }
+        }
+      }
+    },
+    "routes": [
+      {
+        "departure_time_of_day": "07:00AM",
+        "duration_in_traffic": {
+          "text": "20 mins",
+          "value": 1209
+        },
+        "fastest": false,
+        "departure_day": "Monday",
+        "duration_in_traffic_value": 1209
+      },
+      {
+        "departure_time_of_day": "07:10AM",
+        "duration_in_traffic": {
+          "text": "20 mins",
+          "value": 1199
+        },
+        "fastest": false,
+        "departure_day": "Monday",
+        "duration_in_traffic_value": 1199
+      },
+      {
+        "departure_time_of_day": "07:20AM",
+        "duration_in_traffic": {
+          "text": "20 mins",
+          "value": 1196
+        },
+        "fastest": false,
+        "departure_day": "Monday",
+        "duration_in_traffic_value": 1196
+      },
+      {
+        "departure_time_of_day": "07:30AM",
+        "duration_in_traffic": {
+          "text": "20 mins",
+          "value": 1202
+        },
+        "fastest": false,
+        "departure_day": "Monday",
+        "duration_in_traffic_value": 1202
+      },
+      {
+        "departure_time_of_day": "07:40AM",
+        "duration_in_traffic": {
+          "text": "20 mins",
+          "value": 1195
+        },
+        "fastest": false,
+        "departure_day": "Monday",
+        "duration_in_traffic_value": 1195
+      },
+      {
+        "departure_time_of_day": "07:50AM",
+        "duration_in_traffic": {
+          "text": "20 mins",
+          "value": 1190
+        },
+        "fastest": false,
+        "departure_day": "Monday",
+        "duration_in_traffic_value": 1190
+      },
+      {
+        "departure_time_of_day": "08:00AM",
+        "duration_in_traffic": {
+          "text": "20 mins",
+          "value": 1182
+        },
+        "fastest": true,
+        "departure_day": "Monday",
+        "duration_in_traffic_value": 1182
+      }
+    ]
+  }
+}
