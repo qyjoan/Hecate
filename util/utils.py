@@ -2,13 +2,17 @@ import sys
 from datetime import datetime
 from pymongo import MongoClient
 from pandas import DataFrame
+import googlemaps
 
 client = MongoClient()
 db = client.Hecate
 users = db.User
 routes = db.Travel_Route
 stats = db.Stats
+weather = db.weather
 now = datetime.today()
+api_key = 'AIzaSyBxgR9JMqwLxmrydS3bO6t_GoTr7KRD7kI'
+gmaps = googlemaps.Client(key=api_key)
 
 def get_days(username):
     user = users.find_one({'username': username})
@@ -96,7 +100,41 @@ def get_day_date_pair(df):
 def get_user(username):
     return users.find_one({"username": username})
 
+def query_route(route_type, home, work, mode, date, time, day):
+    departure_time = datetime.strptime("{} {}".format(date, time), "%Y-%m-%d %H:%M")
+    if route_type == 'outbound':
+        r = gmaps.directions(home, work, mode=mode, departure_time=departure_time)[0]
+        r['start_address'] = home
+        r['end_address'] = work
+    else:
+        r = gmaps.directions(work, home, mode=mode, departure_time=departure_time)[0]
+        r['start_address'] = work
+        r['end_address'] = home
+
+    r['route_type'] = route_type
+    r['departure_time'] = departure_time
+    r['departure_time_of_day'] = time
+    r['departure_day'] = day
+    r['live'] = False
+    return r
+
+# get weather
+def get_weather_impact(r):
+    if type(r) == dict and r.get('weather') and r['weather'].get('start_address'):
+        if 'weather' in r['weather']['start_address']:
+            w = r['weather']['start_address']['weather']
+            weather_json = weather.find_one({"weather": w})
+            if weather_json is not None:
+                return weather_json['weather_impact']
+    elif r.get('weather') and r['weather'].get('end_address'):
+        if 'weather' in r['weather']['end_address']:
+            w = r['weather']['end_address']['weather']
+            weather_json = weather.find_one({"weather": w})
+            if weather_json is not None:
+                return weather_json['weather_impact']
+    return 0
 # s is an object from sStats
+
 def get_weather(s):
     weathers = []
     username = s['username']

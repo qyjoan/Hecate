@@ -15,8 +15,8 @@ routes = db.Travel_Route
 stats = db.Stats
 
 #api_key = os.environ['GOOGLE_MAP_DIRECTIONS_API_KEY']
-api_key = 'AIzaSyBxgR9JMqwLxmrydS3bO6t_GoTr7KRD7kI'
-gmaps = googlemaps.Client(key=api_key)
+#api_key = 'AIzaSyBxgR9JMqwLxmrydS3bO6t_GoTr7KRD7kI'
+#gmaps = googlemaps.Client(key=api_key)
 
 # takes in username, and route_type
 # returns a dataframe
@@ -32,12 +32,16 @@ class Recommendation:
         self.current_departure_times = self.GetCurrentDeparture()
         self.current_durations = self.GetCurrentDuration()
         self.last_recommended = self.GetLastLoad(username)
+        self.mode = self.GetTravelMode()
         self.outbound_routes = None
         self.homebound_routes = None
         self.best_routes = None
 
     def GetUser(self, username):
         return utils.get_user(username)
+
+    def GetTravelMode(self):
+        return self.user['route']['transportation']
 
     def GetLastLoad(self, username):
         return utils.get_last_load(username).date()
@@ -116,8 +120,9 @@ class Recommendation:
         return result
 
     # routes_df is for a specific route_type
-    def GetCurrentEstimate(self,routes_df, route_type):
+    def GetCurrentEstimate(self, routes_df, route_type):
         result = {}
+        day_date = utils.get_day_date_pair(routes_df)
         for day in routes_df.departure_day.unique():
             result[day] = {}
             current_time = self.current_departure_times[route_type][day]
@@ -128,7 +133,7 @@ class Recommendation:
                 result[day]['duration_sec'] = current_dur[0][0]
                 result[day]['id'] = current_dur[0][1]
             else:
-                current_route = utils.query_route(route_type, self.home_address, self.work_address, departure_time)
+                current_route = utils.query_route(route_type, self.home_address, self.work_address, self.mode, day_date.get(day), current_time, day)
                 result[day]['duration_sec'] = current_route['legs'][0]['duration_in_traffic']['value']
                 result[day]['id'] = None
                 result[day]['route'] = current_route
@@ -145,7 +150,7 @@ class Recommendation:
                 if current_estimates[day]['id'] is not None:
                     route = utils.get_one_route(current_estimates[day]['id'])
                 else:
-                    route = result[day]['route']
+                    route = current_estimates[day]['route']
             else:
                 rec = True
                 sugg_dep = optimal_estimates[day]['departure_time']
@@ -153,13 +158,16 @@ class Recommendation:
                 time_saved = current_estimates[day]['duration_sec'] - optimal_estimates[day]['duration_sec']
                 route = utils.get_one_route(optimal_estimates[day]['id'])
 
+            weather_impact = utils.get_weather_impact(route) * sugg_dur
+
             result[day] = {'new_recommendation': rec,
                            'current_departure': current_estimates[day]['departure_time'],
                            'suggested_departure': sugg_dep,
                            'current_duration': current_estimates[day]['duration_sec'],
                            'suggested_duration': sugg_dur,
                            'time_saved': time_saved,
-                           'route': route}
+                           'route': route,
+                           'weather_impact': weather_impact}
         return result
 
 #def query_route(user, route_type, dt, time):
