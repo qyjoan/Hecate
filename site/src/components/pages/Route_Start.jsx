@@ -440,10 +440,16 @@ var Results = React.createClass({
                 var dayData = outbound[day];
                 var w = dayData['weather'];
                 var weather = w['start_address'];
-                var temp = weather['temperature'];
-                var celcius = temp['celcius'];
-                var max_temp = celcius['max'];
-                var min_temp = celcius['min'];
+                if (weather != null) {
+                    var temp = weather['temperature'];
+                    var celcius = temp['celcius'];
+                    var max_temp = celcius['max'];
+                    var min_temp = celcius['min'];
+                }
+                else {
+                    var max_temp = 0;
+                    var min_temp = 0;
+                }
                 return (
                     <tr>
                         <td>{day}</td>

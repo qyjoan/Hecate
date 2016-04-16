@@ -1,3 +1,6 @@
+#!/usr/bin/python
+
+
 from pymongo import MongoClient
 import pymongo
 import pandas as pd

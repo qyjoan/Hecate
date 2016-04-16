@@ -7,11 +7,13 @@ import CurrentRoute from '../../../common/CurrentRoute';
 import MapRoute from '../../../common/GoogleMaps';
 import Stats from '../../../common/Stats';
 import Weekly from '../../../common/Weekly';
+import WeeklyDetail from './WeeklyDetail.jsx';
 import vectorMap from '../../../common/jquery-jvectormap-2.0.3/jquery-jvectormap-2.0.3.min';
 import code from '../../../common/jquery-jvectormap-2.0.3/jquery-jvectormap-world-mill-en';
 import AppStore from '../../../../stores/AppStore';
 import Translate from '../../../common/Translate';
 import {History} from 'history';
+var Slider = require('react-slick');
 
 var GoogleMaps = require('google-maps'),
     ReactDOM = require('react-dom');
@@ -101,7 +103,8 @@ var Home = React.createClass({
                 yearly_saved: user_data['yearly_projected'] + ' Hours',
                 today_outbound: user_data['today_outbound_departure'] + ' Departure',
                 today_outbound_sub: sub,
-                outbound: user_data['outbound']
+                outbound: user_data['outbound'],
+                homebound: user_data['homebound']
             })
         },
 
@@ -114,7 +117,9 @@ var Home = React.createClass({
             return {
                 user: {},
                 username: null,
-                outbound: {}
+                outbound: {},
+                homebound: {},
+                weeklyDetails: false
             };
 
         },
@@ -147,8 +152,8 @@ var Home = React.createClass({
             AppStore.addChangeListener(this._onChange);
         },
 
-        getDaysHTML: function () {
-            var outbound = this.state.outbound;
+        getDaysHTML: function (data) {
+            var outbound = data
             var html = ""
 
             if ('Monday' in outbound) {
@@ -159,9 +164,9 @@ var Home = React.createClass({
                 html += "<td width='15%'>Monday</td>"
                 html += "<td width='40%'>" +
                     "<table width='100%'><tbody><tr>" +
-                    "<td align='center'><img src='" + require("../../../../common/images/" + day['weather'] + ".png") + "' width='50' height='50'></td>" +
-                    "<td><img src='" + require("../../../../common/images/min.png") + "' />" + min_temp +
-                    "<img src='" + require("../../../../common/images/max.png") + "' />" + max_temp + "</td></tr></tbody></table>" +
+                    "<td align='center'><img src='" + require("../../../../common/images/" + day['weather'] + ".png") + "' alt='" + day['weather'] + "' width='50' height='50'></td>" +
+                    "<td><table width='80%'><tbody><tr><td><img src='" + require("../../../../common/images/min.png") + "' />" + min_temp +
+                    "</td><td><img src='" + require("../../../../common/images/max.png") + "' />" + max_temp + "</td></tr></tbody></table></td></tr></tbody></table>" +
                     "</td>"
                 html += "<td width='15%'>" + day['departure_time'] + "</td>"
                 html += "<td width='15%'>" + day['duration_weather'] + " mins</td>"
@@ -177,9 +182,9 @@ var Home = React.createClass({
                 html += "<td width='15%'>Tuesday</td>"
                 html += "<td width='40%'>" +
                     "<table width='100%'><tbody><tr>" +
-                    "<td align='center'><img src='" + require("../../../../common/images/" + day['weather'] + ".png") + "' width='50' height='50'></td>" +
-                    "<td><img src='" + require("../../../../common/images/min.png") + "' />" + min_temp +
-                    "<img src='" + require("../../../../common/images/max.png") + "' />" + max_temp + "</td></tr></tbody></table>" +
+                    "<td align='center'><img src='" + require("../../../../common/images/" + day['weather'] + ".png") + "' alt='" + day['weather'] + "' width='50' height='50'></td>" +
+                    "<td><table width='80%'><tbody><tr><td><img src='" + require("../../../../common/images/min.png") + "' />" + min_temp +
+                    "</td><td><img src='" + require("../../../../common/images/max.png") + "' />" + max_temp + "</td></tr></tbody></table></td></tr></tbody></table>" +
                     "</td>"
                 html += "<td width='15%'>" + day['departure_time'] + "</td>"
                 html += "<td width='15%'>" + day['duration_weather'] + " mins</td>"
@@ -195,9 +200,9 @@ var Home = React.createClass({
                 html += "<td width='15%'>Wednesday</td>"
                 html += "<td width='40%'>" +
                     "<table width='100%'><tbody><tr>" +
-                    "<td align='center'><img src='" + require("../../../../common/images/" + day['weather'] + ".png") + "' width='50' height='50'></td>" +
-                    "<td><img src='" + require("../../../../common/images/min.png") + "' />" + min_temp +
-                    "<img src='" + require("../../../../common/images/max.png") + "' />" + max_temp + "</td></tr></tbody></table>" +
+                    "<td align='center'><img src='" + require("../../../../common/images/" + day['weather'] + ".png") + "' alt='" + day['weather'] + "' width='50' height='50'></td>" +
+                    "<td><table width='80%'><tbody><tr><td><img src='" + require("../../../../common/images/min.png") + "' />" + min_temp +
+                    "</td><td><img src='" + require("../../../../common/images/max.png") + "' />" + max_temp + "</td></tr></tbody></table></td></tr></tbody></table>" +
                     "</td>"
                 html += "<td width='15%'>" + day['departure_time'] + "</td>"
                 html += "<td width='15%'>" + day['duration_weather'] + " mins</td>"
@@ -213,9 +218,9 @@ var Home = React.createClass({
                 html += "<td width='15%'>Thursday</td>"
                 html += "<td width='40%'>" +
                     "<table width='100%'><tbody><tr>" +
-                    "<td align='center'><img src='" + require("../../../../common/images/" + day['weather'] + ".png") + "' width='50' height='50'></td>" +
-                    "<td><img src='" + require("../../../../common/images/min.png") + "' />" + min_temp +
-                    "<img src='" + require("../../../../common/images/max.png") + "' />" + max_temp + "</td></tr></tbody></table>" +
+                    "<td align='center'><img src='" + require("../../../../common/images/" + day['weather'] + ".png") + "' alt='" + day['weather'] + "' width='50' height='50'></td>" +
+                    "<td><table width='80%'><tbody><tr><td><img src='" + require("../../../../common/images/min.png") + "' />" + min_temp +
+                    "</td><td><img src='" + require("../../../../common/images/max.png") + "' />" + max_temp + "</td></tr></tbody></table></td></tr></tbody></table>" +
                     "</td>"
                 html += "<td width='15%'>" + day['departure_time'] + "</td>"
                 html += "<td width='15%'>" + day['duration_weather'] + " mins</td>"
@@ -231,9 +236,9 @@ var Home = React.createClass({
                 html += "<td width='15%'>Friday</td>"
                 html += "<td width='40%'>" +
                     "<table width='100%'><tbody><tr>" +
-                    "<td align='center'><img src='" + require("../../../../common/images/" + day['weather'] + ".png") + "' width='50' height='50'></td>" +
-                    "<td><img src='" + require("../../../../common/images/min.png") + "' />" + min_temp +
-                    "<img src='" + require("../../../../common/images/max.png") + "' />" + max_temp + "</td></tr></tbody></table>" +
+                    "<td align='center'><img src='" + require("../../../../common/images/" + day['weather'] + ".png") + "' alt='" + day['weather'] + "' width='50' height='50'></td>" +
+                    "<td><table width='80%'><tbody><tr><td><img src='" + require("../../../../common/images/min.png") + "' />" + min_temp +
+                    "</td><td><img src='" + require("../../../../common/images/max.png") + "' />" + max_temp + "</td></tr></tbody></table></td></tr></tbody></table>" +
                     "</td>"
                 html += "<td width='15%'>" + day['departure_time'] + "</td>"
                 html += "<td width='15%'>" + day['duration_weather'] + " mins</td>"
@@ -249,9 +254,9 @@ var Home = React.createClass({
                 html += "<td width='15%'>Saturday</td>"
                 html += "<td width='40%'>" +
                     "<table width='100%'><tbody><tr>" +
-                    "<td align='center'><img src='" + require("../../../../common/images/" + day['weather'] + ".png") + "' width='50' height='50'></td>" +
-                    "<td><img src='" + require("../../../../common/images/min.png") + "' />" + min_temp +
-                    "<img src='" + require("../../../../common/images/max.png") + "' />" + max_temp + "</td></tr></tbody></table>" +
+                    "<td align='center'><img src='" + require("../../../../common/images/" + day['weather'] + ".png") + "' alt='" + day['weather'] + "' width='50' height='50'></td>" +
+                    "<td><table width='80%'><tbody><tr><td><img src='" + require("../../../../common/images/min.png") + "' />" + min_temp +
+                    "</td><td><img src='" + require("../../../../common/images/max.png") + "' />" + max_temp + "</td></tr></tbody></table></td></tr></tbody></table>" +
                     "</td>"
                 html += "<td width='15%'>" + day['departure_time'] + "</td>"
                 html += "<td width='15%'>" + day['duration_weather'] + " mins</td>"
@@ -267,9 +272,9 @@ var Home = React.createClass({
                 html += "<td width='15%'>Sunday</td>"
                 html += "<td width='40%'>" +
                     "<table width='100%'><tbody><tr>" +
-                    "<td align='center'><img src='" + require("../../../../common/images/" + day['weather'] + ".png") + "' width='50' height='50'></td>" +
-                    "<td><img src='" + require("../../../../common/images/min.png") + "' />" + min_temp +
-                    "<img src='" + require("../../../../common/images/max.png") + "' />" + max_temp + "</td></tr></tbody></table>" +
+                    "<td align='center'><img src='" + require("../../../../common/images/" + day['weather'] + ".png") + "' alt='" + day['weather'] + "' width='50' height='50'></td>" +
+                    "<td><table><tbody><tr><td><img src='" + require("../../../../common/images/min.png") + "' />" + min_temp +
+                    "</td><td><img src='" + require("../../../../common/images/max.png") + "' />" + max_temp + "</td></tr></tbody></table></td></tr></tbody></table>" +
                     "</td>"
                 html += "<td width='15%'>" + day['departure_time'] + "</td>"
                 html += "<td width='15%'>" + day['duration_weather'] + " mins</td>"
@@ -280,61 +285,94 @@ var Home = React.createClass({
             return (html)
         },
 
-        render: function () {
-            return (
-                <div>
+        setDetails: function () {
+            console.log('setDetails')
+            this.setState( {
+                weeklyDetails: true
+            })
+        },
 
-                    <div className="conter-wrapper home-container">
-                        <div className="row home-row">
-                            <div className="col-md-4 col-lg-3">
-                                <div className="home-stats">
-                                    <Stats icon="cloud-upload"
-                                           value={this.state.total_saved}
-                                           text={this.state.since_date}
-                                           bgclass="info"
-                                           link="/dashboard/chartc3"
-                                           progressValue="88"
-                                        >
-                                    </Stats>
-                                    <Stats icon="heartbeat"
-                                           value={this.state.yearly_saved}
-                                           text="Est. Saved Per Year"
-                                           bgclass="success"
-                                           link="/dashboard/chartc3"
-                                           progressValue="88"
-                                        >
-                                    </Stats>
-                                    <Stats icon="flag"
-                                           value={this.state.today_outbound}
-                                           text={this.state.today_outbound_sub}
-                                           bgclass="danger"
-                                           link="/dashboard/chartc3"
-                                           progressValue="88"
-                                        >
-                                    </Stats>
+        setNoDetails: function () {
+            console.log('setNoDetails')
+            this.setState( {
+                weeklyDetails: false
+            })
+        },
+
+        render: function () {
+            var settings = {
+                dots: true,
+                infinite: true,
+                speed: 500,
+                slidesToShow: 1,
+                slidesToScroll: 1,
+                arrows: true
+            };
+            if (this.state.weeklyDetails) {
+                return <WeeklyDetail user={this.state.user} onClick={this.setNoDetails}/>
+            }
+            else {
+
+                return (
+                    <div>
+
+                        <div className="conter-wrapper home-container">
+                            <div className="row home-row">
+                                <div className="col-md-4 col-lg-3">
+                                    <div className="home-stats">
+                                        <Stats icon="cloud-upload"
+                                               value={this.state.total_saved}
+                                               text={this.state.since_date}
+                                               bgclass="info"
+                                               link="/dashboard/chartc3"
+                                               progressValue="88"
+                                            >
+                                        </Stats>
+                                        <Stats icon="heartbeat"
+                                               value={this.state.yearly_saved}
+                                               text="Est. Saved Per Year"
+                                               bgclass="success"
+                                               link="/dashboard/chartc3"
+                                               progressValue="88"
+                                            >
+                                        </Stats>
+                                        <Stats icon="flag"
+                                               value={this.state.today_outbound}
+                                               text={this.state.today_outbound_sub}
+                                               bgclass="danger"
+                                               link="/dashboard/chartc3"
+                                               progressValue="88"
+                                            >
+                                        </Stats>
+                                    </div>
+                                </div>
+                                <div className="col-md-8 col-lg-9">
+                                    <div className="home-stats">
+                                        <Slider {...settings}>
+                                        <span><Weekly type="Outbound - This Week"
+                                                      html={this.getDaysHTML(this.state.outbound)}
+                                                      onClick={this.setDetails} /></span>
+                                        <span><Weekly type="Homebound - This Week"
+                                                      html={this.getDaysHTML(this.state.homebound)}
+                                                      onClick={this.setDetails} /></span>
+                                        </Slider>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="col-md-8 col-lg-9">
-                                <div className="home-stats">
-                                    <Weekly type="Outbound - This Week" html={this.getDaysHTML()} />
+                            <div className="row home-row">
+                                <div className="col-lg-12 col-md-12">
+                                    <CurrentRoute user={this.state.user}></CurrentRoute>
                                 </div>
                             </div>
-                        </div>
-                        <div className="row home-row">
-                            <div className="col-lg-12 col-md-12">
-                                <CurrentRoute user={this.state.user}></CurrentRoute>
-                            </div>
-                        </div>
-                        <div className="row home-row">
-                            <div className="col-lg-12 col-md-12">
-                                <div className="maps" id="maps" align="center"></div>
+                            <div className="row home-row">
+                                <div className="col-lg-12 col-md-12">
+                                    <div className="maps" id="maps" align="center"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-
-
-            );
+                );
+            }
         }
         ,
         _onChange: function () {
