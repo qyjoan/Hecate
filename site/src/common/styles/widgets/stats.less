@@ -1,7 +1,7 @@
 a.stat {
 	.box;
 	display: table !important;
-	width: 100%;
+	width: 93%;
 	padding: 10px;
 	height: 89px;
 	margin-bottom: 10px;
@@ -34,4 +34,41 @@ a.stat {
 		height: 5px;
 		margin-bottom: 0;
 	}
+}
+
+.stat {
+	.box;
+	display: table !important;
+	width: 93%;
+	padding: 10px;
+	height: 89px;
+	margin-bottom: 10px;
+	text-align: left;
+	.stat-icon, .stat-label {
+		display: table-cell;
+		vertical-align: middle;
+	}
+	.stat-icon {
+		margin-top: 5px;
+		width: 75px;
+	}
+	.stat-label {
+		.label-header {
+			font-size: 22px;
+		}
+	}
+	.stat-detail {
+		margin-top: 10px;
+		font-size: 14px;
+		color: #666;
+		i {
+			margin-top: 5px;
+		}
+	}
+}
+
+.normal {
+  a {
+	font-size: 12px;
+  }
 }

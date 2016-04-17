@@ -90,6 +90,7 @@
     "style-loader": "^0.12.4",
     "url-loader": "^0.5.6",
     "vent": "0.0.2",
-    "webpack": "^1.12.1"
+    "webpack": "^1.12.1",
+    "react-responsive-carousel": "~3.0.10"
   }
 }

@@ -32,14 +32,26 @@ var Route = React.createClass({
             }
         },
 
+        componentWillMount: function () {
+            var username = sessionStorage.getItem('username');
+
+            if (!username) {
+                this.props.history.push('/login');
+            }
+            else {
+                this.state.username = username;
+            }
+        },
+
         loadUserFromServer: function () {
             console.log('Route Loading')
+            console.log(this.state.username)
             var self = this;
 
             // get walking directions from central park to the empire state building
             var http = require("http");
             var url = "http://54.191.104.28:5000/hecate/api/v1.0/getUser";
-            var data = "user7"
+            var data = this.state.username;
 
             $.ajax({
                 type: "GET",
@@ -54,9 +66,11 @@ var Route = React.createClass({
         handleSubmitSuccess: function (data) {
             var user_data = JSON.parse(data);
 
+            console.log(user_data)
+
             // TODO: SET ALL THE USER PARAMETERS HERE
             this.setState({
-                user: user_data,
+                user: JSON.parse(user_data['data']),
             })
             this.storeDays()
 
@@ -68,7 +82,8 @@ var Route = React.createClass({
 
         getInitialState: function () {
             return {
-                user: {}
+                user: {},
+                username: null
             };
 
         },
@@ -91,8 +106,7 @@ var Route = React.createClass({
         },
 
         componentWillLeave: function () {
-            AppStore.removeCha
-            ngeListener(this._onChange);
+            AppStore.removeChangeListener(this._onChange);
         },
 
         handleChange: function (e) {
@@ -274,6 +288,11 @@ var Route = React.createClass({
             this.setState({type: 'error', message: 'Route Error...'});
         },
 
+        changeHome: function()
+        {
+            console.log ('Changed')
+        },
+
         render: function () {
             if (this.state.type && this.state.message) {
                 var classString = 'alert alert-' + this.state.type;
@@ -282,6 +301,7 @@ var Route = React.createClass({
                 </div>;
             }
             var route = this.state.user['route']
+            console.log(route)
             if (route == undefined) {
                 route = {};
                 var start = '';
@@ -407,7 +427,7 @@ var Route = React.createClass({
                                     {status}
 
                                     <form className="form-horizontal" onSubmit={this.handleFormSubmit}>
-                                        <Input ref="home" type="text" label="Where are leaving from?" value={start}/>
+                                        <Input ref="home" type="text" label="Where are leaving from?" value={start} onChange={this.changeHome()}/>
                                         <Input ref="work" type="text" label="Where are going?"
                                                value={end}/>
                                         <Input ref="mode" type="select" label="What is your mode of transport?"
