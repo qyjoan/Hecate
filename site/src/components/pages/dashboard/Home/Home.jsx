@@ -287,14 +287,14 @@ var Home = React.createClass({
 
         setDetails: function () {
             console.log('setDetails')
-            this.setState( {
+            this.setState({
                 weeklyDetails: true
             })
         },
 
         setNoDetails: function () {
             console.log('setNoDetails')
-            this.setState( {
+            this.setState({
                 weeklyDetails: false
             })
         },
@@ -309,7 +309,11 @@ var Home = React.createClass({
                 arrows: true
             };
             if (this.state.weeklyDetails) {
-                return <WeeklyDetail user={this.state.user} onClick={this.setNoDetails}/>
+                return (
+                    <div>
+                        <WeeklyDetail user={this.state.user} onClick={this.setNoDetails}/>
+                    </div>
+                )
             }
             else {
 
@@ -351,10 +355,10 @@ var Home = React.createClass({
                                         <Slider {...settings}>
                                         <span><Weekly type="Outbound - This Week"
                                                       html={this.getDaysHTML(this.state.outbound)}
-                                                      onClick={this.setDetails} /></span>
+                                                      onClick={this.setDetails}/></span>
                                         <span><Weekly type="Homebound - This Week"
                                                       html={this.getDaysHTML(this.state.homebound)}
-                                                      onClick={this.setDetails} /></span>
+                                                      onClick={this.setDetails}/></span>
                                         </Slider>
                                     </div>
                                 </div>
