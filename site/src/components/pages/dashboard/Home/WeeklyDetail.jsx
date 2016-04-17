@@ -54,7 +54,6 @@ var WeeklyDetail = React.createClass({
 
         handleStatsSubmitSuccess: function (data) {
             var stats = JSON.parse(data);
-            console.log(stats)
             this.setState({
                 outbound: stats['outbound'],
                 homebound: stats['homebound']
@@ -67,7 +66,6 @@ var WeeklyDetail = React.createClass({
 
         handleWeatherSubmitSuccess: function (data) {
             var weather_data = JSON.parse(data);
-            console.log(weather_data)
             this.setState({
                 weather: weather_data['weather'],
                 min_temp: weather_data['min'],
@@ -113,13 +111,11 @@ var WeeklyDetail = React.createClass({
         },
 
         buildHTML: function (outbound, dayName) {
-            console.log(dayName)
             var html = ""
 
             if (dayName in outbound) {
                 var day = outbound[dayName]
                 var times = day['times']
-                console.log(day)
 
                 const times_ordered = {};
                 Object.keys(times).sort().forEach(function (key) {

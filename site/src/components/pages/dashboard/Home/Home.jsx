@@ -79,7 +79,6 @@ var Home = React.createClass({
 
         handleStatsSubmitSuccess: function (data) {
             var user_data = JSON.parse(data);
-            console.log(user_data)
             if (user_data['today_outbound_time_saved'] > 0) {
                 var sub = 'Outbound (Save ' + user_data['today_outbound_time_saved'] + ' mins)'
             }
@@ -88,7 +87,6 @@ var Home = React.createClass({
             }
 
             var t_saved = null
-            console.log(parseFloat(user_data['total_saved_minutes']).toFixed(2))
             if (parseFloat(user_data['total_saved_minutes']).toFixed(2) < 1.0) {
                 t_saved = '< 1 Min Saved'
             }
@@ -125,6 +123,7 @@ var Home = React.createClass({
         },
 
         loadMaps: function () {
+            console.log('loadMaps')
             GoogleMaps.LIBRARIES = ['places'];
             GoogleMaps.KEY = 'AIzaSyAG7Mj4xcF8hVd0_r1CNUXCpI5ycPly6eY';
             user = this.state.user;
@@ -150,6 +149,10 @@ var Home = React.createClass({
 
             this.loadUserFromServer();
             AppStore.addChangeListener(this._onChange);
+        },
+
+        componentDidUpdate: function () {
+            this.loadMaps();
         },
 
         getDaysHTML: function (data) {
@@ -286,14 +289,12 @@ var Home = React.createClass({
         },
 
         setDetails: function () {
-            console.log('setDetails')
             this.setState({
                 weeklyDetails: true
             })
         },
 
         setNoDetails: function () {
-            console.log('setNoDetails')
             this.setState({
                 weeklyDetails: false
             })
@@ -316,7 +317,6 @@ var Home = React.createClass({
                 )
             }
             else {
-
                 return (
                     <div>
 
