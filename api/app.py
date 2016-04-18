@@ -573,7 +573,7 @@ def get_day_stats():
         collection = db.Checks
 
         # Obtain the user details from the DB
-        stats = collection.find({'username': username})
+        stats = collection.find({'username': username}).sort("updated_at", -1)
 
         if stats <> None:
             stat = stats[0]
@@ -623,7 +623,7 @@ def get_day_weather():
             return json.dumps({'success': True,
                                'weather': weather,
                                'min': min_temp,
-                               'max': max_temp
+                               'max': max_temp,
                                }), 200, {'ContentType': 'application/json'}
         else:
             print 'Stats not found'

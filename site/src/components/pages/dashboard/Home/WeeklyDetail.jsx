@@ -154,8 +154,7 @@ var WeeklyDetail = React.createClass({
                     "</td><td><img src='" + require("../../../../common/images/max.png") + "' />" + max_temp + "</td></tr></tbody></table></td></tr></tbody></table>" +
                     "</td></tr>"
                 html += "<tr><td/><td colspan='3'><table width='100%'>" +
-                    "<thead><td><b>Departure Time</b></td><td><b>Duration</b></td><td><b>Est. Arrival</b></td>"
-                "<tbody>"
+                    "<thead><td><b>Departure Time</b></td><td><b>Duration</b></td><td><b>Est. Arrival</b></td></thead><tbody>"
                 // Now loop through the times and output them
                 for (var time in times_ordered) {
                     var data = times_ordered[time]
@@ -183,12 +182,24 @@ var WeeklyDetail = React.createClass({
                     minutes = minutes < 10 ? '0' + minutes : minutes;
                     var arrival = hours + ':' + minutes + ' ' + ampm;
 
-                    html += "<tr><td width='33%'>" + departure + "</td>" // Time
-                    html += "<td width='33%'>" + duration + " mins</td>" // Duration
-                    html += "<td width='33%'>" + arrival + "</td>" // Est Arrival
+                    if (data['optimal'] == true) {
+                        html += "<tr class='optimal'>"
+                    }
+                    else {
+                        html += "<tr>"
+                    }
+                    html += "<td width='25%'>" + departure + "</td>" // Time
+                    html += "<td width='25%'>" + duration + " mins</td>" // Duration
+                    html += "<td width='25%'>" + arrival + "</td>" // Est Arrival
+                    html += "<td width='25%'>"
+                    if (data['optimal'] == true) {
+                        html += "Recommended Time"
+                    }
+                    html += "</td>"
                     html += "</tr>"
+                    console.log(html)
                 }
-                html += "</table></tr>"
+                html += "</tbody></table></tr>"
             }
             return html
         },
