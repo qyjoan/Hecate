@@ -45,7 +45,6 @@ var MenuBar = React.createClass({
               <ul className="nested-dropdown animated fadeIn">
                 <li className="sidemenu-header">My Route</li>
                 <li><Link to="/dashboard/route">Manage Route</Link></li>
-                <li><Link to="/dashboard/dropdowns">View Recommendations</Link></li>
               </ul>
             </li>
           </ul>

@@ -316,6 +316,7 @@ def buildJSON(data):
             data['fastest'] = True
             day_data['optimal_time'] = fastest_tod
             day_data['optimal_duration'] = fastest_duration
+            day_data['optimal_duration_value'] = int(current_fastest)
 
         return day
 

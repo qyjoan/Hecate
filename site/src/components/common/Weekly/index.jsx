@@ -28,10 +28,17 @@ var Weekly = React.createClass({
     },
 
     render: function () {
+        if (this.props.details == "No") {
+            var detailText = "normal-hidden"
+        }
+        else {
+            var detailText = "normal"
+        }
+
         return ( <span className="stat">
             <div className="stat-label">
                     <div className="label-header">
-                        {this.props.type}  <span className="normal"><Link to="#" onClick={this.changeHandler}>[Details]</Link></span>
+                        {this.props.type} <span className={detailText}><Link to="#" onClick={this.changeHandler}>[Details]</Link></span>
                     </div>
                     <ProgressBar bsStyle="success" className="progress-sm"
                                  now="88" key={1}/>
