@@ -203,18 +203,26 @@ def update_route():
         print(exc_type, fname, exc_tb.tb_lineno, e)
 
 
-@app.route('/hecate/api/v1.0/create_user', methods=['POST'])
+@app.route('/hecate/api/v1.0/create_user', methods=['POST', 'OPTIONS'])
 @crossdomain(origin='*')
 # @oauth.require_oauth()
 def create_user():
     data = {}
     try:
-        data = ast.literal_eval(request.data)
+        data = json.loads(request.get_data())
     except ValueError as e:
         print ("<p>Error: %s</p>" % e.message)
 
     user = User()
-    response = user.CreateUser(data)
+    response = user.CreateUser(data['user'])
+
+    if response == "Error: User Already Exists":
+        return json.dumps({'success': False,
+                       'error': 'User Already Exists.'
+                       }), 200, {'ContentType': 'application/json'}
+    else:
+        return json.dumps({'success': True,
+                           }), 200, {'ContentType': 'application/json'}
 
     return response
 

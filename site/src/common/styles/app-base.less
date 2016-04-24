@@ -372,3 +372,18 @@ ul.actions li {
 .slick-dots li.slick-active button:before { color: black; opacity: 0.75; }
 
 /*# sourceMappingURL=slick.css.map */
+
+@prefixClass: rc-time-picker;
+
+.@{prefixClass} {
+  display: inline-block;
+  box-sizing: border-box;
+  * {
+    box-sizing: border-box;
+  }
+}
+
+@import "widgets/Picker/Picker";
+@import "widgets/Picker/Panel";
+@import "widgets/Picker/Header";
+@import "widgets/Picker/Select";

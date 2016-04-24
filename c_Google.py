@@ -278,7 +278,7 @@ class Google():
         owm = pyowm.OWM('24d3c38432258a49a6a101c36f314732')
 
         # Get the weather for the next 7 days
-        fc = owm.daily_forecast(address, limit=7)
+        fc = owm.daily_forecast(address, limit=10)
 
         return fc
 
